@@ -113,8 +113,8 @@ export default function InterestsQuiz() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-[#2c2f33] to-[#23272a] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#7289da]"></div>
       </div>
     )
   }
@@ -129,50 +129,50 @@ export default function InterestsQuiz() {
   }, {} as Record<string, Interest[]>)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-green-50 to-blue-50 py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-[#2c2f33] to-[#23272a] py-6 sm:py-8 px-4">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <div className="bg-gradient-to-r from-purple-500 to-green-500 rounded-full p-3">
-              <Heart className="h-8 w-8 text-white" />
+            <div className="bg-gradient-to-r from-[#7289da] to-[#6cf0c8] rounded-full p-3 shadow-lg">
+              <Heart className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
             </div>
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">
             ¡Cuéntanos sobre ti!
           </h1>
-          <p className="text-lg text-gray-600 mb-2">
+          <p className="text-base sm:text-lg text-gray-300 mb-2">
             Selecciona tus intereses para encontrar personas afines
           </p>
-          <p className="text-sm text-purple-600 font-medium">
+          <p className="text-sm text-[#7289da] font-medium">
             Selecciona al menos 3 intereses ({selectedInterests.length} seleccionados)
           </p>
         </div>
 
         {/* Interests Grid */}
-        <div className="space-y-8">
+        <div className="space-y-6">
           {Object.entries(interestsByCategory).map(([category, categoryInterests]: [string, Interest[]]) => (
-            <div key={category} className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/20">
-              <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                <span className="bg-gradient-to-r from-purple-600 to-green-600 bg-clip-text text-transparent">
+            <div key={category} className="bg-[#2c2f33]/80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 shadow-lg border border-[#7289da]/20">
+              <h2 className="text-lg sm:text-xl font-bold mb-4 flex items-center">
+                <span className="bg-gradient-to-r from-[#7289da] to-[#6cf0c8] bg-clip-text text-transparent">
                   {category}
                 </span>
               </h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3">
                 {categoryInterests.map((interest) => (
                   <button
                     key={interest.id}
                     onClick={() => handleInterestToggle(interest.id)}
                     className={`relative p-3 rounded-xl text-sm font-medium transition-all duration-300 ${
                       selectedInterests.includes(interest.id)
-                        ? 'bg-gradient-to-r from-purple-500 to-green-500 text-white shadow-lg transform scale-105'
-                        : 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 hover:border-purple-300'
+                        ? 'bg-gradient-to-r from-[#7289da] to-[#6cf0c8] text-white shadow-lg transform scale-[1.02]'
+                        : 'bg-[#23272a] hover:bg-[#2c2f33] text-gray-300 border border-[#7289da]/20 hover:border-[#7289da]/50'
                     }`}
                   >
                     {interest.name}
                     {selectedInterests.includes(interest.id) && (
-                      <div className="absolute -top-1 -right-1 bg-white rounded-full p-1">
-                        <Check className="h-3 w-3 text-purple-600" />
+                      <div className="absolute -top-1 -right-1 bg-[#23272a] rounded-full p-1 shadow-lg border border-[#7289da]/20">
+                        <Check className="h-3 w-3 text-[#6cf0c8]" />
                       </div>
                     )}
                   </button>
@@ -187,10 +187,10 @@ export default function InterestsQuiz() {
           <button
             onClick={handleSaveInterests}
             disabled={selectedInterests.length < 3 || saving}
-            className={`inline-flex items-center px-8 py-4 text-lg font-semibold rounded-full transition-all duration-300 ${
+            className={`inline-flex items-center px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold rounded-full transition-all duration-300 ${
               selectedInterests.length >= 3 && !saving
-                ? 'bg-gradient-to-r from-purple-600 to-green-600 text-white hover:from-purple-700 hover:to-green-700 transform hover:scale-105 shadow-xl'
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                ? 'bg-gradient-to-r from-[#7289da] to-[#6cf0c8] text-white hover:from-[#6cf0c8] hover:to-[#7289da] transform hover:scale-105 shadow-xl'
+                : 'bg-[#23272a] text-gray-500 cursor-not-allowed'
             }`}
           >
             {saving ? (
@@ -207,7 +207,7 @@ export default function InterestsQuiz() {
           </button>
           
           {selectedInterests.length > 0 && selectedInterests.length < 3 && (
-            <p className="text-orange-600 mt-2 text-sm">
+            <p className="text-[#6cf0c8] mt-2 text-sm">
               Selecciona {3 - selectedInterests.length} intereses más para continuar
             </p>
           )}

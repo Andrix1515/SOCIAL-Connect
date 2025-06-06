@@ -87,36 +87,36 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460] flex items-center justify-center p-4">
       <div className="max-w-md w-full">
         {/* Header */}
         <div className="text-center mb-8">
           <button 
             onClick={handleBackToHome}
-            className="inline-flex items-center text-purple-600 hover:text-purple-700 mb-4 transition-colors"
+            className="inline-flex items-center text-[#e94560] hover:text-[#ff6b6b] mb-4 transition-colors"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Volver al inicio
+            <span className="text-white">Volver al inicio</span>
           </button>
           
-          <div className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-            <h1 className="text-3xl font-bold mb-2">SocialConnect</h1>
+          <div className="bg-gradient-to-r from-[#e94560] to-[#ff6b6b] bg-clip-text text-transparent">
+            <h1 className="text-4xl sm:text-5xl font-bold mb-2">SocialConnect</h1>
           </div>
-          <p className="text-gray-600">
+          <p className="text-gray-300">
             {isLogin ? 'Inicia sesión en tu cuenta' : 'Crea tu cuenta y comienza a conectar'}
           </p>
         </div>
 
         {/* Auth Card */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-white/20">
+        <div className="bg-[#1f1f3a]/90 backdrop-blur-sm rounded-2xl shadow-xl p-6 sm:p-8 border border-[#e94560]/20">
           {/* Toggle Buttons */}
-          <div className="flex bg-gray-100 rounded-xl p-1 mb-6">
+          <div className="flex bg-[#16213e] rounded-xl p-1 mb-6">
             <button
               onClick={() => setIsLogin(true)}
               className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
                 isLogin 
-                  ? 'bg-white text-purple-600 shadow-sm' 
-                  : 'text-gray-600 hover:text-gray-800'
+                  ? 'bg-[#e94560] text-white shadow-lg' 
+                  : 'text-gray-300 hover:text-white'
               }`}
             >
               Iniciar Sesión
@@ -125,8 +125,8 @@ export default function AuthPage() {
               onClick={() => setIsLogin(false)}
               className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
                 !isLogin 
-                  ? 'bg-white text-purple-600 shadow-sm' 
-                  : 'text-gray-600 hover:text-gray-800'
+                  ? 'bg-[#e94560] text-white shadow-lg' 
+                  : 'text-gray-300 hover:text-white'
               }`}
             >
               Registrarse
@@ -135,7 +135,7 @@ export default function AuthPage() {
 
           {/* Error Message */}
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-4 text-sm">
+            <div className="bg-red-900/50 border border-red-500 text-red-300 px-4 py-3 rounded-lg mb-4 text-sm">
               {error}
             </div>
           )}
@@ -145,7 +145,7 @@ export default function AuthPage() {
             {/* Full Name (only for signup) */}
             {!isLogin && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
                   Nombre completo
                 </label>
                 <div className="relative">
@@ -155,7 +155,7 @@ export default function AuthPage() {
                     name="fullName"
                     value={formData.fullName}
                     onChange={handleInputChange}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all"
+                    className="w-full pl-10 pr-4 py-3 bg-[#16213e] border border-[#e94560]/30 rounded-lg focus:ring-2 focus:ring-[#e94560] focus:border-transparent transition-all text-white placeholder-gray-400"
                     placeholder="Tu nombre completo"
                     required
                   />
@@ -165,7 +165,7 @@ export default function AuthPage() {
 
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 Correo electrónico
               </label>
               <div className="relative">
@@ -175,7 +175,7 @@ export default function AuthPage() {
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all"
+                  className="w-full pl-10 pr-4 py-3 bg-[#16213e] border border-[#e94560]/30 rounded-lg focus:ring-2 focus:ring-[#e94560] focus:border-transparent transition-all text-white placeholder-gray-400"
                   placeholder="tu@email.com"
                   required
                 />
@@ -184,7 +184,7 @@ export default function AuthPage() {
 
             {/* Password */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 Contraseña
               </label>
               <div className="relative">
@@ -194,7 +194,7 @@ export default function AuthPage() {
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all"
+                  className="w-full pl-10 pr-12 py-3 bg-[#16213e] border border-[#e94560]/30 rounded-lg focus:ring-2 focus:ring-[#e94560] focus:border-transparent transition-all text-white placeholder-gray-400"
                   placeholder="••••••••"
                   required
                   minLength={6}
@@ -202,13 +202,13 @@ export default function AuthPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 hover:text-white"
                 >
                   {showPassword ? <EyeOff /> : <Eye />}
                 </button>
               </div>
               {!isLogin && (
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-400 mt-1">
                   Mínimo 6 caracteres
                 </p>
               )}
@@ -218,7 +218,7 @@ export default function AuthPage() {
             <button
               onClick={isLogin ? handleLogin : handleSignUp}
               disabled={loading}
-              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 px-4 rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 focus:ring-2 focus:ring-purple-600 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="w-full bg-gradient-to-r from-[#e94560] to-[#ff6b6b] text-white py-3 px-4 rounded-lg font-medium hover:from-[#ff6b6b] hover:to-[#e94560] focus:ring-2 focus:ring-[#e94560] focus:ring-offset-2 focus:ring-offset-[#1f1f3a] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
             >
               {loading ? (
                 <div className="flex items-center justify-center">
@@ -232,13 +232,13 @@ export default function AuthPage() {
           </div>
 
           {/* Additional Info */}
-          <div className="mt-6 text-center text-sm text-gray-600">
+          <div className="mt-6 text-center text-sm text-gray-300">
             {isLogin ? (
               <p>
                 ¿No tienes cuenta?{' '}
                 <button 
                   onClick={() => setIsLogin(false)}
-                  className="text-purple-600 hover:text-purple-700 font-medium"
+                  className="text-[#e94560] hover:text-[#ff6b6b] font-medium"
                 >
                   Regístrate aquí
                 </button>
@@ -248,7 +248,7 @@ export default function AuthPage() {
                 ¿Ya tienes cuenta?{' '}
                 <button 
                   onClick={() => setIsLogin(true)}
-                  className="text-purple-600 hover:text-purple-700 font-medium"
+                  className="text-[#e94560] hover:text-[#ff6b6b] font-medium"
                 >
                   Inicia sesión
                 </button>

@@ -290,33 +290,33 @@ export default function EditProfile() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-green-50 to-blue-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-[#2c2f33] to-[#23272a] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#7289da]"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-green-50 to-blue-50">
-      <div className="max-w-2xl mx-auto py-8 px-6 bg-white/60 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20">
+    <div className="min-h-screen bg-gradient-to-br from-[#2c2f33] to-[#23272a]">
+      <div className="max-w-2xl mx-auto py-6 sm:py-8 px-4 sm:px-6">
         {/* Header */}
         <div className="flex items-center mb-8">
           <button
             onClick={() => router.push('/dashboard')}
-            className="mr-4 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="mr-4 p-2 rounded-lg hover:bg-[#7289da]/10 transition-colors"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-5 h-5 text-[#7289da]" />
           </button>
-          <h1 className="text-3xl font-extrabold bg-gradient-to-r from-purple-600 to-green-600 bg-clip-text text-transparent">
+          <h1 className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-[#7289da] to-[#6cf0c8] bg-clip-text text-transparent">
             Editar Perfil
           </h1>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Avatar Section */}
-          <div className="bg-white/80 rounded-xl shadow-md p-6 border border-white/30">
-            <h2 className="text-xl font-semibold mb-4 flex items-center text-gray-900">
-              <Camera className="w-6 h-6 mr-2" />
+          <div className="bg-[#23272a]/80 backdrop-blur-sm rounded-xl shadow-md p-4 sm:p-6 border border-[#7289da]/20">
+            <h2 className="text-xl font-semibold mb-4 flex items-center text-white">
+              <Camera className="w-6 h-6 mr-2 text-[#7289da]" />
               Foto de Perfil
             </h2>
             <div className="flex items-center space-x-6">
@@ -325,11 +325,11 @@ export default function EditProfile() {
                   <img
                     src={profile.avatar_url}
                     alt="Avatar"
-                    className="w-24 h-24 rounded-full object-cover border-4 border-gradient-to-r from-purple-600 to-green-600"
+                    className="w-20 sm:w-24 h-20 sm:h-24 rounded-full object-cover border-4 border-[#7289da]"
                   />
                 ) : (
-                  <div className="w-24 h-24 rounded-full bg-gradient-to-r from-purple-600 to-green-600 flex items-center justify-center border-4 border-white">
-                    <User className="w-10 h-10 text-white" />
+                  <div className="w-20 sm:w-24 h-20 sm:h-24 rounded-full bg-gradient-to-r from-[#7289da] to-[#6cf0c8] flex items-center justify-center border-4 border-[#23272a]">
+                    <User className="w-8 sm:w-10 h-8 sm:h-10 text-white" />
                   </div>
                 )}
                 {uploading && (
@@ -349,12 +349,12 @@ export default function EditProfile() {
                 />
                 <label
                   htmlFor="avatar"
-                  className="inline-flex items-center px-5 py-2 border border-purple-600 rounded-lg shadow-sm text-sm font-semibold text-purple-600 bg-white hover:bg-purple-50 cursor-pointer disabled:opacity-50"
+                  className="inline-flex items-center px-4 sm:px-5 py-2 border border-[#7289da] rounded-lg shadow-sm text-sm font-semibold text-[#7289da] bg-[#2c2f33] hover:bg-[#7289da]/10 cursor-pointer disabled:opacity-50 transition-colors"
                 >
                   <Upload className="w-5 h-5 mr-2" />
                   {uploading ? 'Subiendo...' : 'Cambiar foto'}
                 </label>
-                <p className="text-xs text-gray-600 mt-1">
+                <p className="text-xs text-gray-400 mt-1">
                   JPG, PNG o GIF. Máximo 5MB.
                 </p>
               </div>
@@ -362,11 +362,11 @@ export default function EditProfile() {
           </div>
 
           {/* Basic Information */}
-          <div className="bg-white/80 rounded-xl shadow-md p-6 border border-white/30">
-            <h2 className="text-xl font-semibold mb-4 text-gray-900">Información Básica</h2>
+          <div className="bg-[#23272a]/80 backdrop-blur-sm rounded-xl shadow-md p-4 sm:p-6 border border-[#7289da]/20">
+            <h2 className="text-xl font-semibold mb-4 text-white">Información Básica</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
                   Nombre Completo
                 </label>
                 <input
@@ -374,39 +374,39 @@ export default function EditProfile() {
                   name="full_name"
                   value={formData.full_name}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-[#2c2f33] border border-[#7289da]/30 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#7289da] focus:border-transparent text-white placeholder-gray-500"
                   placeholder="Tu nombre completo"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
                   Carrera
                 </label>
                 <select
                   name="career"
                   value={formData.career}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-[#2c2f33] border border-[#7289da]/30 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#7289da] focus:border-transparent text-white"
                 >
-                  <option value="">Selecciona tu carrera</option>
+                  <option value="" className="bg-[#23272a]">Selecciona tu carrera</option>
                   {CAREERS.map(career => (
-                    <option key={career} value={career}>{career}</option>
+                    <option key={career} value={career} className="bg-[#23272a]">{career}</option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
                   Semestre
                 </label>
                 <select
                   name="semester"
                   value={formData.semester}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-[#2c2f33] border border-[#7289da]/30 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#7289da] focus:border-transparent text-white"
                 >
-                  <option value="">Selecciona tu semestre</option>
+                  <option value="" className="bg-[#23272a]">Selecciona tu semestre</option>
                   {Array.from({ length: 10 }, (_, i) => i + 1).map(sem => (
-                    <option key={sem} value={sem}>{sem}° Semestre</option>
+                    <option key={sem} value={sem} className="bg-[#23272a]">{sem}° Semestre</option>
                   ))}
                 </select>
               </div>
@@ -414,25 +414,25 @@ export default function EditProfile() {
           </div>
 
           {/* Extroversion Level */}
-          <div className="bg-white/80 rounded-xl shadow-md p-6 border border-white/30">
-            <h2 className="text-xl font-semibold mb-4 text-gray-900">Nivel de Extroversión</h2>
-            <p className="text-sm text-gray-600 mb-4">
+          <div className="bg-[#23272a]/80 backdrop-blur-sm rounded-xl shadow-md p-4 sm:p-6 border border-[#7289da]/20">
+            <h2 className="text-xl font-semibold mb-4 text-white">Nivel de Extroversión</h2>
+            <p className="text-sm text-gray-300 mb-4">
               Esto nos ayuda a conectarte con personas compatibles con tu personalidad
             </p>
             <div className="space-y-4">
               {EXTROVERSION_LEVELS.map(level => (
-                <label key={level.value} className="flex items-start space-x-4 cursor-pointer">
+                <label key={level.value} className="flex items-start space-x-4 cursor-pointer group">
                   <input
                     type="radio"
                     name="extroversion_level"
                     value={level.value}
                     checked={formData.extroversion_level === level.value.toString()}
                     onChange={handleInputChange}
-                    className="mt-1 h-5 w-5 text-purple-600 focus:ring-purple-500 border-gray-300"
+                    className="mt-1 h-5 w-5 text-[#7289da] focus:ring-[#7289da] border-[#7289da]/30 bg-[#2c2f33]"
                   />
                   <div className="flex-1">
-                    <div className="font-semibold text-gray-900">{level.label}</div>
-                    <div className="text-sm text-gray-500">{level.description}</div>
+                    <div className="font-semibold text-white group-hover:text-[#7289da] transition-colors">{level.label}</div>
+                    <div className="text-sm text-gray-400">{level.description}</div>
                   </div>
                 </label>
               ))}
@@ -440,35 +440,35 @@ export default function EditProfile() {
           </div>
 
           {/* Description */}
-          <div className="bg-white/80 rounded-xl shadow-md p-6 border border-white/30">
-            <h2 className="text-xl font-semibold mb-4 text-gray-900">Sobre ti</h2>
+          <div className="bg-[#23272a]/80 backdrop-blur-sm rounded-xl shadow-md p-4 sm:p-6 border border-[#7289da]/20">
+            <h2 className="text-xl font-semibold mb-4 text-white">Sobre ti</h2>
             <textarea
               name="description"
               value={formData.description}
               onChange={handleInputChange}
               rows={5}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+              className="w-full px-4 py-3 bg-[#2c2f33] border border-[#7289da]/30 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#7289da] focus:border-transparent text-white placeholder-gray-500"
               placeholder="Cuéntanos un poco sobre ti, tus intereses, hobbies o cualquier cosa que quieras compartir..."
               maxLength={500}
             />
-            <div className="text-right text-sm text-gray-500 mt-1">
+            <div className="text-right text-sm text-gray-400 mt-1">
               {formData.description.length}/500 caracteres
             </div>
           </div>
 
           {/* Submit Button */}
-          <div className="flex justify-end space-x-4">
+          <div className="flex flex-col sm:flex-row justify-end space-y-4 sm:space-y-0 sm:space-x-4">
             <button
               type="button"
               onClick={() => router.push('/dashboard')}
-              className="px-6 py-3 border border-gray-300 rounded-lg shadow-sm text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-600"
+              className="w-full sm:w-auto px-6 py-3 border border-[#7289da]/30 rounded-lg shadow-sm text-sm font-semibold text-gray-300 bg-[#2c2f33] hover:bg-[#7289da]/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#7289da] transition-colors"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="px-6 py-3 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-gradient-to-r from-purple-600 to-green-600 hover:from-purple-700 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+              className="w-full sm:w-auto px-6 py-3 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-gradient-to-r from-[#7289da] to-[#6cf0c8] hover:from-[#6cf0c8] hover:to-[#7289da] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#7289da] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-all duration-300 transform hover:scale-[1.02]"
             >
               {saving ? (
                 <>

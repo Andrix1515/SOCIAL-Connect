@@ -156,30 +156,30 @@ export default function ConversationsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-[#1a1a2e] to-[#0f3460] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#e94560]"></div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-green-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460]">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm shadow-sm border-b border-white/20 sticky top-0 z-10">
+      <header className="bg-[#1f1f3a]/90 backdrop-blur-sm shadow-lg border-b border-[#e94560]/20 sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <button
                 onClick={() => router.push('/dashboard')}
-                className="mr-4 p-2 hover:bg-gray-100 rounded-full transition-colors"
+                className="mr-4 p-2 hover:bg-[#e94560]/10 rounded-full transition-colors"
               >
-                <ArrowLeft className="h-5 w-5 text-gray-600" />
+                <ArrowLeft className="h-5 w-5 text-[#e94560]" />
               </button>
               <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-green-600 bg-clip-text text-transparent">
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-[#e94560] to-[#ff6b6b] bg-clip-text text-transparent">
                   Conversaciones
                 </h1>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-300">
                   {conversations.length} conversaciones activas
                 </p>
               </div>
@@ -197,7 +197,7 @@ export default function ConversationsPage() {
             placeholder="Buscar conversaciones..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 bg-white/60 backdrop-blur-sm border border-white/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-3 bg-[#1f1f3a]/60 backdrop-blur-sm border border-[#e94560]/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#e94560] focus:border-transparent text-white placeholder-gray-400"
           />
         </div>
       </div>
@@ -206,12 +206,12 @@ export default function ConversationsPage() {
       <div className="max-w-4xl mx-auto px-4 pb-8">
         {filteredConversations.length === 0 ? (
           <div className="text-center py-12">
-            <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/20 max-w-md mx-auto">
-              <MessageCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            <div className="bg-[#1f1f3a]/60 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-[#e94560]/20 max-w-md mx-auto">
+              <MessageCircle className="h-16 w-16 text-[#e94560] mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-white mb-2">
                 {searchTerm ? 'No se encontraron conversaciones' : '¡Aún no tienes conversaciones!'}
               </h3>
-              <p className="text-gray-600 mb-4">
+              <p className="text-gray-300 mb-4">
                 {searchTerm 
                   ? 'Intenta con otro término de búsqueda'
                   : 'Ve al dashboard y comienza a chatear con otros usuarios'
@@ -219,47 +219,47 @@ export default function ConversationsPage() {
               </p>
               <button
                 onClick={() => router.push('/dashboard')}
-                className="bg-gradient-to-r from-purple-600 to-green-600 text-white px-6 py-3 rounded-xl font-medium hover:from-purple-700 hover:to-green-700 transition-all duration-300"
+                className="bg-gradient-to-r from-[#e94560] to-[#ff6b6b] text-white px-6 py-3 rounded-xl font-medium hover:from-[#ff6b6b] hover:to-[#e94560] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
               >
                 Ir al Dashboard
               </button>
             </div>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {filteredConversations.map((conversation) => (
               <div
                 key={conversation.id}
                 onClick={() => router.push(`/chat?userId=${conversation.id}`)}
-                className="bg-white/60 backdrop-blur-sm rounded-2xl p-4 shadow-sm border border-white/20 hover:shadow-lg transition-all duration-300 cursor-pointer hover:scale-[1.02]"
+                className="bg-[#1f1f3a]/60 backdrop-blur-sm rounded-2xl p-4 shadow-lg border border-[#e94560]/20 hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-[1.02] hover:bg-[#1f1f3a]/80"
               >
                 <div className="flex items-center space-x-4">
                   {/* Avatar */}
                   <div className="relative">
-                    <div className="w-14 h-14 bg-gradient-to-r from-purple-400 to-green-400 rounded-full flex items-center justify-center flex-shrink-0">
+                    <div className="w-14 h-14 bg-gradient-to-r from-[#e94560] to-[#ff6b6b] rounded-full flex items-center justify-center flex-shrink-0">
                       <span className="text-xl font-bold text-white">
                         {conversation.full_name ? conversation.full_name[0].toUpperCase() : conversation.email[0].toUpperCase()}
                       </span>
                     </div>
                     {conversation.is_online && (
-                      <Circle className="absolute -bottom-1 -right-1 h-4 w-4 fill-green-500 text-green-500" />
+                      <Circle className="absolute -bottom-1 -right-1 h-4 w-4 fill-[#4ade80] text-[#4ade80]" />
                     )}
                   </div>
 
                   {/* Información de la Conversación */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
-                      <h3 className="text-lg font-semibold text-gray-900 truncate">
+                      <h3 className="text-lg font-semibold text-white truncate">
                         {conversation.full_name || 'Usuario'}
                       </h3>
                       <div className="flex items-center space-x-2">
                         {conversation.last_message_time && (
-                          <span className="text-sm text-gray-500">
+                          <span className="text-sm text-gray-300">
                             {formatLastMessageTime(conversation.last_message_time)}
                           </span>
                         )}
                         {conversation.unread_count > 0 && (
-                          <div className="bg-gradient-to-r from-purple-500 to-green-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center">
+                          <div className="bg-gradient-to-r from-[#e94560] to-[#ff6b6b] text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center shadow-lg">
                             {conversation.unread_count > 99 ? '99+' : conversation.unread_count}
                           </div>
                         )}
@@ -267,11 +267,11 @@ export default function ConversationsPage() {
                     </div>
                     
                     <div className="flex items-center space-x-2">
-                      <p className="text-sm text-gray-600 truncate flex-1">
+                      <p className="text-sm text-gray-300 truncate flex-1">
                         {conversation.last_message || 'Nueva conversación'}
                       </p>
                       {conversation.is_online && (
-                        <span className="text-xs text-green-600 font-medium">En línea</span>
+                        <span className="text-xs text-[#4ade80] font-medium">En línea</span>
                       )}
                     </div>
                   </div>

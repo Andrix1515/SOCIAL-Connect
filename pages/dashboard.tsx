@@ -343,62 +343,62 @@ export default function ImprovedDashboard({ initialSession, user, profile }: {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-[#464758] via-[#233561] to-[#7289da] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#7289da]"></div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-green-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-[#2c2f33] via-[#2c2f33] to-[#23272a]">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm shadow-sm border-b border-white/20 sticky top-0 z-10">
+      <header className="bg-[#464758]/80 backdrop-blur-sm shadow-lg border-b border-[#7289da]/20 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <div className="flex items-center">
-              <div className="bg-gradient-to-r from-purple-600 to-green-600 rounded-full p-2 mr-3">
+              <div className="bg-gradient-to-r from-[#7289da] to-[#6cf0c8] rounded-full p-2 mr-3">
                 <Sparkles className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-green-600 bg-clip-text text-transparent">
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-[#7289da] to-[#6cf0c8] bg-clip-text text-transparent">
                   SocialConnect
                 </h1>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-300">
                   ¡Hola {currentProfile && currentProfile.full_name ? currentProfile.full_name : 'Usuario'}!
                 </p>
               </div>
             </div>
             
-            <div className="flex items-center space-x-4">
+            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4">
               <button
                 onClick={() => router.push('/edit_profile')}
-                className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-green-600 rounded-lg hover:from-purple-700 hover:to-green-700 transition-colors"
+                className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-[#7289da] to-[#6cf0c8] rounded-lg hover:from-[#d64156] hover:to-[#482e74] transition-colors"
               >
                 <User className="h-4 w-4 mr-2" />
                 Editar Perfil
               </button>
               <button
                 onClick={() => router.push('/conversations')}
-                className="relative inline-flex items-center px-4 py-2 text-sm font-medium text-purple-600 bg-purple-100 rounded-lg hover:bg-purple-200 transition-colors"
+                className="relative inline-flex items-center px-4 py-2 text-sm font-medium text-[#e5d2d3] bg-[#ceb2a4]/50 rounded-lg hover:bg-[#7289da]/20 transition-colors"
               >
                 <Mail className="h-4 w-4 mr-2" />
                 Mensajes
                 {unreadMessages > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                  <span className="absolute -top-2 -right-2 bg-[#7289da] text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                     {unreadMessages > 99 ? '99+' : unreadMessages}
                   </span>
                 )}
               </button>
               <button
                 onClick={() => router.push('/interests-quiz')}
-                className="inline-flex items-center px-4 py-2 text-sm font-medium text-purple-600 bg-purple-100 rounded-lg hover:bg-purple-200 transition-colors"
+                className="inline-flex items-center px-4 py-2 text-sm font-medium text-[#6cf0c8] bg-[#6cf0c8]/10 rounded-lg hover:bg-[#6cf0c8]/20 transition-colors"
               >
                 <Heart className="h-4 w-4 mr-2" />
                 Mis Intereses
               </button>
               <button
                 onClick={handleLogout}
-                className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-300 bg-gray-800/30 rounded-lg hover:bg-gray-800/50 transition-colors"
               >
                 <LogOut className="h-4 w-4 mr-2" />
                 Salir
@@ -410,18 +410,18 @@ export default function ImprovedDashboard({ initialSession, user, profile }: {
 
       {/* Filtros y Búsqueda */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="bg-gray-800/60 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-gray-700 mb-8">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+        <div className="bg-[#464758]/60 backdrop-blur-sm rounded-2xl p-4 sm:p-6 shadow-lg border border-[#7289da]/20 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Búsqueda */}
             <div className="lg:col-span-2">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-300" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <input
                   type="text"
                   placeholder="Buscar por nombre, email o intereses..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-gray-900 text-white border border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-3 bg-[#233561] text-white border border-[#6cf0c8]/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7289da] focus:border-transparent"
                 />
               </div>
             </div>
@@ -431,7 +431,7 @@ export default function ImprovedDashboard({ initialSession, user, profile }: {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-900 text-white border border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-3 bg-[#233561] text-white border border-[#6cf0c8]/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7289da] focus:border-transparent"
               >
                 <option value="all">Todas las categorías</option>
                 {categories.map((category) => (
@@ -447,7 +447,7 @@ export default function ImprovedDashboard({ initialSession, user, profile }: {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as 'compatibility' | 'recent' | 'name')}
-                className="w-full px-4 py-3 bg-gray-900 text-white border border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-3 bg-[#233561] text-white border border-[#6cf0c8]/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7289da] focus:border-transparent"
               >
                 <option value="compatibility">Más compatible</option>
                 <option value="recent">Más reciente</option>
@@ -458,33 +458,33 @@ export default function ImprovedDashboard({ initialSession, user, profile }: {
         </div>
 
         {/* Estadísticas */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/20">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-8">
+          <div className="bg-[#464758]/60 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-[#7289da]/20">
             <div className="flex items-center">
-              <Users className="h-8 w-8 text-purple-600 mr-3" />
+              <Users className="h-8 w-8 text-[#7289da] mr-3" />
               <div>
-                <p className="text-2xl font-bold text-gray-900">{filteredUsers.length}</p>
-                <p className="text-sm text-gray-600">Usuarios disponibles</p>
+                <p className="text-2xl font-bold text-white">{filteredUsers.length}</p>
+                <p className="text-sm text-gray-300">Usuarios disponibles</p>
               </div>
             </div>
           </div>
-          <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/20">
+          <div className="bg-[#464758]/60 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-[#7289da]/20">
             <div className="flex items-center">
-              <Star className="h-8 w-8 text-yellow-500 mr-3" />
+              <Star className="h-8 w-8 text-[#6cf0c8] mr-3" />
               <div>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-2xl font-bold text-white">
                   {filteredUsers.filter(user => user.compatibility_score >= 70).length}
                 </p>
-                <p className="text-sm text-gray-600">Muy compatibles</p>
+                <p className="text-sm text-gray-300">Muy compatibles</p>
               </div>
             </div>
           </div>
-          <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/20">
+          <div className="bg-[#464758]/60 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-[#7289da]/20">
             <div className="flex items-center">
-              <MessageCircle className="h-8 w-8 text-blue-600 mr-3" />
+              <MessageCircle className="h-8 w-8 text-[#7289da] mr-3" />
               <div>
-                <p className="text-2xl font-bold text-gray-900">{unreadMessages}</p>
-                <p className="text-sm text-gray-600">Mensajes sin leer</p>
+                <p className="text-2xl font-bold text-white">{unreadMessages}</p>
+                <p className="text-sm text-gray-300">Mensajes sin leer</p>
               </div>
             </div>
           </div>
@@ -492,10 +492,10 @@ export default function ImprovedDashboard({ initialSession, user, profile }: {
 
         {/* Main Content */}
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+          <h2 className="text-3xl font-bold text-white mb-2">
             Descubre personas increíbles
           </h2>
-          <p className="text-lg text-gray-600">
+          <p className="text-lg text-gray-300">
             {filteredUsers.length === users.length 
               ? `Conecta con ${users.length} personas que comparten tus intereses`
               : `Mostrando ${filteredUsers.length} de ${users.length} usuarios`
@@ -505,15 +505,15 @@ export default function ImprovedDashboard({ initialSession, user, profile }: {
 
         {filteredUsers.length === 0 ? (
           <div className="text-center py-12">
-            <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/20 max-w-md mx-auto">
+            <div className="bg-[#464758]/60 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-[#7289da]/20 max-w-md mx-auto">
               <User className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              <h3 className="text-xl font-semibold text-white mb-2">
                 {searchTerm || selectedCategory !== 'all' 
                   ? '¡No se encontraron usuarios!' 
                   : '¡Aún no hay usuarios!'
                 }
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-300">
                 {searchTerm || selectedCategory !== 'all'
                   ? 'Intenta ajustar los filtros de búsqueda'
                   : 'Sé de los primeros en unirte a nuestra comunidad. Comparte el enlace con tus amigos para comenzar a conectar.'
@@ -522,24 +522,24 @@ export default function ImprovedDashboard({ initialSession, user, profile }: {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {filteredUsers.map((user) => {
               const isHighlyCompatible = user.compatibility_score && user.compatibility_score >= 70;
               
               return (
                 <div 
                   key={user.id} 
-                  className={`relative bg-white/60 backdrop-blur-sm rounded-2xl p-6 shadow-lg transition-all duration-300 hover:scale-105 ${
+                  className={`relative bg-[#464758]/60 backdrop-blur-sm rounded-2xl p-6 shadow-lg transition-all duration-300 hover:scale-105 ${
                     user.isTopMatch 
-                      ? 'border-2 border-purple-400 shadow-lg shadow-purple-200 hover:shadow-xl hover:shadow-purple-300 animate-pulse-slow' 
+                      ? 'border-2 border-[#7289da] shadow-lg shadow-[#7289da]/20 hover:shadow-xl hover:shadow-[#7289da]/30 animate-pulse-slow' 
                       : isHighlyCompatible
-                      ? 'border-2 border-green-400 shadow-lg shadow-green-100 hover:shadow-xl hover:shadow-green-200'
-                      : 'border border-white/20 hover:shadow-xl'
+                      ? 'border-2 border-[#6cf0c8] shadow-lg shadow-[#6cf0c8]/20 hover:shadow-xl hover:shadow-[#6cf0c8]/30'
+                      : 'border border-[#7289da]/20 hover:shadow-xl'
                   }`}
                 >
                   {/* Insignia de mejor match */}
                   {user.isTopMatch && (
-                    <div className="absolute -top-4 -right-4 bg-gradient-to-r from-purple-600 to-green-600 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg transform rotate-12 animate-bounce-slow flex items-center gap-2">
+                    <div className="absolute -top-4 -right-4 bg-gradient-to-r from-[#7289da] to-[#6cf0c8] text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg transform rotate-12 animate-bounce-slow flex items-center gap-2">
                       <Star className="h-4 w-4" />
                       ¡Mejor Match!
                     </div>
@@ -547,18 +547,24 @@ export default function ImprovedDashboard({ initialSession, user, profile }: {
                   
                   {/* Insignia de alta compatibilidad */}
                   {isHighlyCompatible && !user.isTopMatch && (
-                    <div className="absolute -top-3 -right-3 bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-1 rounded-full text-sm font-semibold shadow-lg">
+                    <div className="absolute -top-3 -right-3 bg-gradient-to-r from-[#6cf0c8] to-[#7289da] text-white px-4 py-1 rounded-full text-sm font-semibold shadow-lg">
                       ¡Match Perfecto!
                     </div>
                   )}
 
                   {/* Score de Compatibilidad */}
                   {user.compatibility_score !== undefined && user.compatibility_score > 0 && (
-                    <div className={`flex justify-between items-center mb-4 ${user.isTopMatch ? 'bg-purple-50 p-2 rounded-lg' : ''}`}>
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getCompatibilityColor(user.compatibility_score)}`}>
+                    <div className={`flex justify-between items-center mb-4 ${user.isTopMatch ? 'bg-[#6cf0c8]/10 p-2 rounded-lg' : ''}`}>
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        user.compatibility_score >= 70 
+                          ? 'bg-[#6cf0c8]/20 text-[#6cf0c8]' 
+                          : user.compatibility_score >= 40 
+                          ? 'bg-[#7289da]/20 text-[#7289da]' 
+                          : 'bg-gray-800/30 text-gray-300'
+                      }`}>
                         {user.compatibility_score}% compatible
                       </span>
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-gray-400">
                         {getCompatibilityText(user.compatibility_score)}
                       </span>
                     </div>
@@ -571,26 +577,26 @@ export default function ImprovedDashboard({ initialSession, user, profile }: {
                         <img
                           src={user.avatar_url}
                           alt={`Foto de ${user.full_name || 'Usuario'}`}
-                          className="w-full h-full rounded-full object-cover border-4 border-gradient-to-r from-purple-400 to-green-400"
+                          className="w-full h-full rounded-full object-cover border-4 border-gradient-to-r from-[#7289da] to-[#6cf0c8]"
                         />
                       ) : (
-                        <div className="w-full h-full bg-gradient-to-r from-purple-400 to-green-400 rounded-full flex items-center justify-center">
+                        <div className="w-full h-full bg-gradient-to-r from-[#7289da] to-[#6cf0c8] rounded-full flex items-center justify-center">
                           <span className="text-2xl font-bold text-white">
                             {user.full_name ? user.full_name[0].toUpperCase() : user.email[0].toUpperCase()}
                           </span>
                         </div>
                       )}
                     </div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-1">
+                    <h3 className="text-xl font-semibold text-white mb-1">
                       {user.full_name || 'Usuario'}
                     </h3>
                     {user.career && (
-                      <p className="text-sm text-purple-600 font-medium mb-2">
+                      <p className="text-sm text-[#7289da] font-medium mb-2">
                         {user.career}
                       </p>
                     )}
                     {user.description && (
-                      <p className="text-sm text-gray-600 line-clamp-2 mb-3">
+                      <p className="text-sm text-gray-300 line-clamp-2 mb-3">
                         {user.description}
                       </p>
                     )}
@@ -599,21 +605,21 @@ export default function ImprovedDashboard({ initialSession, user, profile }: {
                   {/* Intereses Compartidos */}
                   {user.shared_interests && user.shared_interests.length > 0 && (
                     <div className="mb-4">
-                      <h4 className="text-sm font-medium text-purple-700 mb-2 flex items-center">
-                        <Star className="h-4 w-4 mr-2 text-purple-600" />
+                      <h4 className="text-sm font-medium text-[#7289da] mb-2 flex items-center">
+                        <Star className="h-4 w-4 mr-2 text-[#7289da]" />
                         Intereses compartidos
                       </h4>
                       <div className="flex flex-wrap gap-2">
                         {user.shared_interests.slice(0, 3).map((interest, index) => (
                           <span
                             key={index}
-                            className="px-3 py-1 bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 rounded-full text-xs font-medium border border-green-200"
+                            className="px-3 py-1 bg-[#6cf0c8]/20 text-[#6cf0c8] rounded-full text-xs font-medium border border-[#6cf0c8]/30"
                           >
                             {interest.name}
                           </span>
                         ))}
                         {user.shared_interests.length > 3 && (
-                          <span className="px-3 py-1 bg-green-100 text-green-600 rounded-full text-xs font-medium">
+                          <span className="px-3 py-1 bg-[#6cf0c8]/20 text-[#6cf0c8] rounded-full text-xs font-medium">
                             +{user.shared_interests.length - 3} más
                           </span>
                         )}
@@ -623,21 +629,21 @@ export default function ImprovedDashboard({ initialSession, user, profile }: {
 
                   {/* Todos los Intereses */}
                   <div className="mb-6">
-                    <h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center">
-                      <Heart className="h-4 w-4 mr-2 text-purple-600" />
+                    <h4 className="text-sm font-medium text-[#7289da] mb-3 flex items-center">
+                      <Heart className="h-4 w-4 mr-2 text-[#7289da]" />
                       Todos los intereses
                     </h4>
                     <div className="flex flex-wrap gap-2">
                       {user.interest_names.slice(0, 6).map((interestName, index) => (
                         <span
                           key={index}
-                          className="px-3 py-1 bg-gradient-to-r from-purple-100 to-green-100 text-purple-700 rounded-full text-xs font-medium"
+                          className="px-3 py-1 bg-[#7289da]/10 text-[#7289da] rounded-full text-xs font-medium"
                         >
                           {interestName}
                         </span>
                       ))}
                       {user.interest_names.length > 6 && (
-                        <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
+                        <span className="px-3 py-1 bg-gray-800/30 text-gray-300 rounded-full text-xs font-medium">
                           +{user.interest_names.length - 6} más
                         </span>
                       )}
@@ -647,7 +653,7 @@ export default function ImprovedDashboard({ initialSession, user, profile }: {
                   {/* Action Button */}
                   <button
                     onClick={() => handleStartChat(user.id, user.full_name || user.email)}
-                    className="w-full bg-gradient-to-r from-purple-600 to-green-600 text-white py-3 px-4 rounded-xl font-medium hover:from-purple-700 hover:to-green-700 transition-all duration-300 flex items-center justify-center group"
+                    className="w-full bg-gradient-to-r from-[#7289da] to-[#6cf0c8] text-white py-3 px-4 rounded-xl font-medium hover:from-[#d64156] hover:to-[#482e74] transition-all duration-300 flex items-center justify-center group"
                   >
                     <MessageCircle className="h-5 w-5 mr-2 group-hover:animate-bounce" />
                     Iniciar Chat

@@ -670,20 +670,20 @@ export default function ChatPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-[#2c2f33] via-[#2c2f33] to-[#23272a] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#7289da]"></div>
       </div>
     )
   }
 
   if (!chatUser) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-[#2c2f33] via-[#2c2f33] to-[#23272a] flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Usuario no encontrado</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">Usuario no encontrado</h2>
           <button
             onClick={() => router.push('/dashboard')}
-            className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors"
+            className="bg-gradient-to-r from-[#7289da] to-[#6cf0c8] text-white px-6 py-3 rounded-lg hover:opacity-90 transition-opacity"
           >
             Volver al Dashboard
           </button>
@@ -693,36 +693,36 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-green-50 to-blue-50 flex flex-col h-screen">
+    <div className="min-h-screen bg-gradient-to-br from-[#2c2f33] via-[#2c2f33] to-[#23272a] flex flex-col h-screen">
       {/* Header del Chat - Fijo */}
-      <header className="bg-white/80 backdrop-blur-sm shadow-sm border-b border-white/20 sticky top-0 z-50">
+      <header className="bg-[#464758]/80 backdrop-blur-sm shadow-lg border-b border-[#7289da]/20 sticky top-0 z-50">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <button
                 onClick={() => router.push('/dashboard')}
-                className="mr-4 p-2 hover:bg-gray-100 rounded-full transition-colors"
+                className="mr-4 p-2 hover:bg-[#7289da]/20 rounded-full transition-colors"
               >
-                <ArrowLeft className="h-5 w-5 text-gray-600" />
+                <ArrowLeft className="h-5 w-5 text-[#7289da]" />
               </button>
               
               <div className="flex items-center">
                 <div className="relative">
-                  <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-green-400 rounded-full flex items-center justify-center">
+                  <div className="w-12 h-12 bg-gradient-to-r from-[#7289da] to-[#6cf0c8] rounded-full flex items-center justify-center">
                     <span className="text-lg font-bold text-white">
                       {chatUser.full_name ? chatUser.full_name[0].toUpperCase() : chatUser.email[0].toUpperCase()}
                     </span>
                   </div>
                   {isOnline && (
-                    <Circle className="absolute -bottom-1 -right-1 h-4 w-4 fill-green-500 text-green-500" />
+                    <Circle className="absolute -bottom-1 -right-1 h-4 w-4 fill-[#6cf0c8] text-[#6cf0c8]" />
                   )}
                 </div>
                 
                 <div className="ml-3">
-                  <h1 className="text-lg font-semibold text-gray-900">
+                  <h1 className="text-lg font-semibold text-white">
                     {chatUser.full_name || 'Usuario'}
                   </h1>
-                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                  <div className="flex items-center space-x-2 text-sm text-gray-300">
                     <span>{isOnline ? 'En línea' : 'Desconectado'}</span>
                     {chatUser.user_interests.length > 0 && (
                       <>
@@ -736,14 +736,14 @@ export default function ChatPage() {
             </div>
 
             <div className="flex items-center space-x-2">
-              <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                <Phone className="h-5 w-5 text-gray-600" />
+              <button className="p-2 hover:bg-[#7289da]/20 rounded-full transition-colors">
+                <Phone className="h-5 w-5 text-[#7289da]" />
               </button>
-              <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                <Video className="h-5 w-5 text-gray-600" />
+              <button className="p-2 hover:bg-[#7289da]/20 rounded-full transition-colors">
+                <Video className="h-5 w-5 text-[#7289da]" />
               </button>
-              <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                <MoreVertical className="h-5 w-5 text-gray-600" />
+              <button className="p-2 hover:bg-[#7289da]/20 rounded-full transition-colors">
+                <MoreVertical className="h-5 w-5 text-[#7289da]" />
               </button>
             </div>
           </div>
@@ -753,20 +753,20 @@ export default function ChatPage() {
       {/* Intereses - Parte del área scrolleable */}
       <div className="flex-1 overflow-y-auto" style={{ height: 'calc(100vh - 144px)' }}>
         {chatUser.user_interests.length > 0 && (
-          <div className="bg-gradient-to-r from-purple-100 to-green-100 border-b border-white/20 sticky top-0 z-10">
+          <div className="bg-[#464758]/60 border-b border-[#7289da]/20 sticky top-0 z-10">
             <div className="max-w-4xl mx-auto px-4 py-3">
               <div className="flex items-center space-x-2 text-sm">
-                <Heart className="h-4 w-4 text-purple-600" />
-                <span className="text-purple-700 font-medium">Intereses:</span>
+                <Heart className="h-4 w-4 text-[#7289da]" />
+                <span className="text-[#7289da] font-medium">Intereses:</span>
                 <div className="flex flex-wrap gap-2">
                   {chatUser.user_interests.slice(0, 5).map((userInterest, index) => (
-                    <span key={index} className="text-purple-600">
+                    <span key={index} className="text-[#6cf0c8]">
                       {userInterest.interests.name}
                       {index < Math.min(chatUser.user_interests.length, 5) - 1 && ','}
                     </span>
                   ))}
                   {chatUser.user_interests.length > 5 && (
-                    <span className="text-purple-600">+{chatUser.user_interests.length - 5} más</span>
+                    <span className="text-[#6cf0c8]">+{chatUser.user_interests.length - 5} más</span>
                   )}
                 </div>
               </div>
@@ -780,7 +780,7 @@ export default function ChatPage() {
             <div className="text-center mb-4">
               <button
                 onClick={loadMoreMessages}
-                className="bg-white/60 backdrop-blur-sm px-4 py-2 rounded-full text-sm text-purple-600 hover:bg-white/80 transition-colors"
+                className="bg-[#464758]/60 backdrop-blur-sm px-4 py-2 rounded-full text-sm text-[#7289da] hover:bg-[#464758]/80 transition-colors"
               >
                 Cargar mensajes anteriores
               </button>
@@ -789,14 +789,14 @@ export default function ChatPage() {
           
           {messages.length === 0 ? (
             <div className="text-center py-12">
-              <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-8 max-w-md mx-auto">
-                <div className="w-16 h-16 bg-gradient-to-r from-purple-400 to-green-400 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="bg-[#464758]/60 backdrop-blur-sm rounded-2xl p-8 max-w-md mx-auto">
+                <div className="w-16 h-16 bg-gradient-to-r from-[#7289da] to-[#6cf0c8] rounded-full flex items-center justify-center mx-auto mb-4">
                   <Heart className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                <h3 className="text-xl font-semibold text-white mb-2">
                   ¡Inicia la conversación!
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-300">
                   Sé el primero en enviar un mensaje a {chatUser.full_name || 'este usuario'}
                 </p>
               </div>
@@ -812,7 +812,7 @@ export default function ChatPage() {
                   <div key={message.id}>
                     {showTimestamp && (
                       <div className="text-center mb-4">
-                        <span className="bg-white/60 backdrop-blur-sm px-3 py-1 rounded-full text-xs text-gray-500">
+                        <span className="bg-[#464758]/60 backdrop-blur-sm px-3 py-1 rounded-full text-xs text-gray-300">
                           {formatTime(message.created_at)}
                         </span>
                       </div>
@@ -821,30 +821,30 @@ export default function ChatPage() {
                     <div className={`flex ${isFromCurrentUser ? 'justify-end' : 'justify-start'}`}>
                       <div className={`max-w-xs lg:max-w-md ${
                         isFromCurrentUser
-                          ? 'bg-gradient-to-r from-purple-600 to-green-600 text-white'
-                          : 'bg-white/80 backdrop-blur-sm text-gray-900 shadow-sm'
+                          ? 'bg-gradient-to-r from-[#7289da] to-[#6cf0c8] text-white'
+                          : 'bg-[#464758]/80 backdrop-blur-sm text-white shadow-sm'
                       } rounded-2xl relative group`}>
                         
                         {/* Menú de opciones para mensajes propios */}
                         {isFromCurrentUser && !message.deleted && (
-                          <div className="absolute -right-20 top-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center space-x-2 bg-white/90 backdrop-blur-sm rounded-lg p-1 shadow-lg">
+                          <div className="absolute -right-20 top-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center space-x-2 bg-[#464758]/90 backdrop-blur-sm rounded-lg p-1 shadow-lg">
                             {editingMessage === message.id ? (
                               <button
                                 onClick={saveEditMessage}
-                                className="p-2 hover:bg-purple-100 rounded-lg transition-colors flex items-center space-x-1"
+                                className="p-2 hover:bg-[#7289da]/20 rounded-lg transition-colors flex items-center space-x-1"
                                 title="Guardar cambios"
                               >
                                 <span>✅</span>
-                                <span className="text-xs text-gray-600">Guardar</span>
+                                <span className="text-xs text-gray-300">Guardar</span>
                               </button>
                             ) : (
                               <button
                                 onClick={() => handleEditMessage(message.id)}
-                                className="p-2 hover:bg-purple-100 rounded-lg transition-colors flex items-center space-x-1"
+                                className="p-2 hover:bg-[#7289da]/20 rounded-lg transition-colors flex items-center space-x-1"
                                 title="Editar mensaje"
                               >
                                 <span>✏️</span>
-                                <span className="text-xs text-gray-600">Editar</span>
+                                <span className="text-xs text-gray-300">Editar</span>
                               </button>
                             )}
                             <button
@@ -853,11 +853,11 @@ export default function ChatPage() {
                                   handleDeleteMessage(message.id);
                                 }
                               }}
-                              className="p-2 hover:bg-red-100 rounded-lg transition-colors flex items-center space-x-1"
+                              className="p-2 hover:bg-red-500/20 rounded-lg transition-colors flex items-center space-x-1"
                               title="Eliminar mensaje"
                             >
                               <span>🗑️</span>
-                              <span className="text-xs text-gray-600">Eliminar</span>
+                              <span className="text-xs text-gray-300">Eliminar</span>
                             </button>
                           </div>
                         )}
@@ -871,7 +871,7 @@ export default function ChatPage() {
                               <textarea
                                 value={editContent}
                                 onChange={(e) => setEditContent(e.target.value)}
-                                className="w-full px-2 py-1 rounded bg-white/20 text-white placeholder-white/60 resize-none focus:outline-none focus:ring-2 focus:ring-white/50"
+                                className="w-full px-2 py-1 rounded bg-[#464758]/60 text-white placeholder-white/60 resize-none focus:outline-none focus:ring-2 focus:ring-[#7289da]/50"
                                 placeholder="Editar mensaje..."
                                 rows={2}
                                 onKeyPress={(e) => {
@@ -919,9 +919,9 @@ export default function ChatPage() {
                                   onClick={() => handleReaction(message.id, emoji)}
                                   className={`px-2 py-0.5 rounded-full text-xs ${
                                     users.includes(user?.id || '')
-                                      ? 'bg-white/20'
-                                      : 'bg-white/10'
-                                  } hover:bg-white/30 transition-colors`}
+                                      ? 'bg-[#7289da]/20'
+                                      : 'bg-[#464758]/60'
+                                  } hover:bg-[#7289da]/30 transition-colors`}
                                 >
                                   {emoji} {users.length}
                                 </button>
@@ -931,7 +931,7 @@ export default function ChatPage() {
 
                           {/* Metadata del mensaje */}
                           <div className={`text-xs mt-1 flex items-center space-x-2 ${
-                            isFromCurrentUser ? 'text-purple-100' : 'text-gray-500'
+                            isFromCurrentUser ? 'text-white/80' : 'text-gray-300'
                           }`}>
                             <span>{formatTime(message.created_at)}</span>
                             {message.edited && <span className="opacity-60">(editado)</span>}
@@ -954,7 +954,7 @@ export default function ChatPage() {
       </div>
 
       {/* Input de Mensaje - Fijo */}
-      <div className="bg-white/80 backdrop-blur-sm border-t border-white/20 sticky bottom-0 z-50">
+      <div className="bg-[#464758]/80 backdrop-blur-sm border-t border-[#7289da]/20 sticky bottom-0 z-50">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex space-x-4">
             <div className="flex-1 flex space-x-4">
@@ -971,7 +971,7 @@ export default function ChatPage() {
                     }
                   }}
                   placeholder={editingMessage ? "Editar mensaje..." : "Escribe un mensaje..."}
-                  className="w-full px-4 py-3 bg-gray-50 text-gray-900 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-[#2c2f33] text-white border border-[#7289da]/30 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#7289da] focus:border-transparent placeholder-gray-400"
                   disabled={sending}
                   onKeyPress={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
@@ -998,13 +998,13 @@ export default function ChatPage() {
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   disabled={sending}
-                  className="p-3 rounded-2xl bg-gray-100 hover:bg-gray-200 transition-colors"
+                  className="p-3 rounded-2xl bg-[#2c2f33] hover:bg-[#7289da]/20 transition-colors text-[#7289da]"
                 >
                   📷
                 </button>
                 <button
                   onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                  className="p-3 rounded-2xl bg-gray-100 hover:bg-gray-200 transition-colors"
+                  className="p-3 rounded-2xl bg-[#2c2f33] hover:bg-[#7289da]/20 transition-colors text-[#7289da]"
                 >
                   😊
                 </button>
@@ -1014,7 +1014,7 @@ export default function ChatPage() {
             <button
               onClick={editingMessage ? saveEditMessage : sendMessage}
               disabled={(!newMessage.trim() && !editingMessage) || sending}
-              className="bg-gradient-to-r from-purple-600 to-green-600 text-white p-3 rounded-2xl hover:from-purple-700 hover:to-green-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-gradient-to-r from-[#7289da] to-[#6cf0c8] text-white p-3 rounded-2xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {sending ? (
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
@@ -1028,7 +1028,7 @@ export default function ChatPage() {
 
           {/* Selector de emojis */}
           {showEmojiPicker && (
-            <div className="absolute bottom-20 right-4 bg-white rounded-lg shadow-lg p-2">
+            <div className="absolute bottom-20 right-4 bg-[#464758] rounded-lg shadow-lg p-2">
               <div className="grid grid-cols-8 gap-1">
                 {['👍', '❤️', '😊', '😂', '😍', '🎉', '👏', '🔥'].map(emoji => (
                   <button
@@ -1042,7 +1042,7 @@ export default function ChatPage() {
                       }
                       setShowEmojiPicker(false)
                     }}
-                    className="p-2 hover:bg-gray-100 rounded"
+                    className="p-2 hover:bg-[#7289da]/20 rounded transition-colors"
                   >
                     {emoji}
                   </button>
@@ -1052,32 +1052,6 @@ export default function ChatPage() {
           )}
         </div>
       </div>
-
-      {/* Estilos para el indicador de escritura */}
-      <style jsx>{`
-        .typing-indicator {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 2px;
-        }
-        
-        .typing-indicator span {
-          width: 4px;
-          height: 4px;
-          background-color: #6B7280;
-          border-radius: 50%;
-          animation: bounce 1.4s infinite ease-in-out;
-        }
-        
-        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
-        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
-        
-        @keyframes bounce {
-          0%, 80%, 100% { transform: scale(0); }
-          40% { transform: scale(1); }
-        }
-      `}</style>
     </div>
   )
 }
