@@ -445,63 +445,102 @@ export default function ChatPage() {
   }
 
   const handleEditMessage = async (messageId: number) => {
-    const message = messages.find(m => m.id === messageId)
-    if (!message || message.sender_id !== user?.id) return
+    try {
+      const message = messages.find(m => m.id === messageId)
+      if (!message || message.sender_id !== user?.id) {
+        console.log('No se puede editar el mensaje:', { message, userId: user?.id })
+        return
+      }
 
-    setEditingMessage(messageId)
-    setEditContent(message.content)
-    setShowEmojiPicker(false)
+      console.log('Editando mensaje:', messageId)
+      setEditingMessage(messageId)
+      setEditContent(message.content)
+      setShowEmojiPicker(false)
+    } catch (error) {
+      console.error('Error al iniciar edición:', error)
+    }
   }
 
   const saveEditMessage = async () => {
-    if (!editingMessage || !editContent.trim()) return
-
     try {
-      const { error } = await supabase
+      if (!editingMessage || !editContent.trim() || !user) {
+        console.log('No se puede guardar la edición:', { editingMessage, content: editContent })
+        return
+      }
+
+      console.log('Guardando edición del mensaje:', editingMessage)
+      const { data, error } = await supabase
         .from('messages')
         .update({ 
           content: editContent.trim(),
           edited: true 
         })
         .eq('id', editingMessage)
+        .eq('sender_id', user.id) // Asegurar que solo el remitente puede editar
 
-      if (error) throw error
+      if (error) {
+        console.error('Error en la base de datos:', error)
+        throw error
+      }
 
-      // Refrescar mensajes después de editar
-      await refreshMessages()
+      console.log('Mensaje editado exitosamente:', data)
+      
+      // Actualizar el mensaje localmente
+      setMessages(prev => prev.map(msg => 
+        msg.id === editingMessage 
+          ? { ...msg, content: editContent.trim(), edited: true }
+          : msg
+      ))
 
       setEditingMessage(null)
       setEditContent('')
     } catch (error) {
-      console.error('Error editing message:', error)
+      console.error('Error al guardar la edición:', error)
       alert('Error al editar el mensaje')
     }
   }
 
   const handleDeleteMessage = async (messageId: number) => {
-    const message = messages.find(m => m.id === messageId)
-    if (!message || message.sender_id !== user?.id) return
-
     try {
-      const { error } = await supabase
+      if (!user) return
+
+      const message = messages.find(m => m.id === messageId)
+      if (!message || message.sender_id !== user.id) {
+        console.log('No se puede eliminar el mensaje:', { message, userId: user.id })
+        return
+      }
+
+      console.log('Eliminando mensaje:', messageId)
+      const { data, error } = await supabase
         .from('messages')
         .update({ 
           deleted: true,
           content: 'Este mensaje fue eliminado'
         })
         .eq('id', messageId)
+        .eq('sender_id', user.id) // Asegurar que solo el remitente puede eliminar
 
-      if (error) throw error
+      if (error) {
+        console.error('Error en la base de datos:', error)
+        throw error
+      }
 
-      // Refrescar mensajes después de eliminar
-      await refreshMessages()
+      console.log('Mensaje eliminado exitosamente:', data)
+      
+      // Actualizar el mensaje localmente
+      setMessages(prev => prev.map(msg => 
+        msg.id === messageId 
+          ? { ...msg, deleted: true, content: 'Este mensaje fue eliminado' }
+          : msg
+      ))
 
+      // Si estábamos editando este mensaje, cancelar la edición
       if (editingMessage === messageId) {
         setEditingMessage(null)
         setEditContent('')
       }
     } catch (error) {
-      console.error('Error deleting message:', error)
+      console.error('Error al eliminar el mensaje:', error)
       alert('Error al eliminar el mensaje')
     }
   }
@@ -510,36 +549,88 @@ export default function ChatPage() {
     const file = event.target.files?.[0]
     if (!file || !user) return
 
+    // Validar el tipo y tamaño del archivo
+    const fileType = file.type
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+    const maxSize = 5 * 1024 * 1024 // 5MB
+
+    if (!validTypes.includes(fileType)) {
+      alert('Solo se permiten imágenes en formato JPG, PNG, GIF o WEBP')
+      return
+    }
+
+    if (file.size > maxSize) {
+      alert('La imagen no debe superar los 5MB')
+      return
+    }
+
     try {
       setSending(true)
+      
+      // Crear un nombre único para el archivo
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
+      const filePath = `${user.id}/${fileName}`
+
+      console.log('Subiendo imagen:', { fileName, fileType, size: file.size })
       
       // Subir imagen a Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase
         .storage
         .from('chat-images')
-        .upload(`${user.id}/${Date.now()}-${file.name}`, file)
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          contentType: fileType,
+          upsert: false
+        })
 
-      if (uploadError) throw uploadError
+      if (uploadError) {
+        console.error('Error al subir la imagen:', uploadError)
+        throw uploadError
+      }
+
+      console.log('Imagen subida exitosamente:', uploadData)
 
       // Obtener URL pública de la imagen
-      const { data: { publicUrl } } = supabase
+      const { data } = supabase
         .storage
         .from('chat-images')
-        .getPublicUrl(uploadData.path)
+        .getPublicUrl(filePath)
+
+      if (!data.publicUrl) {
+        console.error('Error: No se pudo obtener la URL pública')
+        throw new Error('No se pudo obtener la URL pública de la imagen')
+      }
+
+      console.log('URL pública obtenida:', data.publicUrl)
 
       // Enviar mensaje con la imagen
-      await supabase
+      const { data: messageData, error: messageError } = await supabase
         .from('messages')
         .insert({
           sender_id: user.id,
           receiver_id: userId,
           content: '📷 Imagen',
-          image_url: publicUrl
+          image_url: data.publicUrl
         })
+        .select()
+        .single()
+
+      if (messageError) {
+        console.error('Error al crear mensaje con imagen:', messageError)
+        throw messageError
+      }
+
+      console.log('Mensaje con imagen enviado:', messageData)
+
+      // Actualizar la lista de mensajes localmente
+      if (messageData) {
+        setMessages(prev => [...prev, messageData])
+      }
 
     } catch (error) {
-      console.error('Error uploading image:', error)
-      alert('Error al subir la imagen')
+      console.error('Error detallado al subir la imagen:', error)
+      alert('Error al subir la imagen. Por favor, intenta de nuevo.')
     } finally {
       setSending(false)
       if (fileInputRef.current) {
@@ -602,9 +693,9 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-green-50 to-blue-50 flex flex-col">
-      {/* Header del Chat */}
-      <header className="bg-white/80 backdrop-blur-sm shadow-sm border-b border-white/20 sticky top-0 z-10">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-green-50 to-blue-50 flex flex-col h-screen">
+      {/* Header del Chat - Fijo */}
+      <header className="bg-white/80 backdrop-blur-sm shadow-sm border-b border-white/20 sticky top-0 z-50">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
@@ -659,31 +750,31 @@ export default function ChatPage() {
         </div>
       </header>
 
-      {/* Intereses Compartidos */}
-      {chatUser.user_interests.length > 0 && (
-        <div className="bg-gradient-to-r from-purple-100 to-green-100 border-b border-white/20">
-          <div className="max-w-4xl mx-auto px-4 py-3">
-            <div className="flex items-center space-x-2 text-sm">
-              <Heart className="h-4 w-4 text-purple-600" />
-              <span className="text-purple-700 font-medium">Intereses:</span>
-              <div className="flex flex-wrap gap-2">
-                {chatUser.user_interests.slice(0, 5).map((userInterest, index) => (
-                  <span key={index} className="text-purple-600">
-                    {userInterest.interests.name}
-                    {index < Math.min(chatUser.user_interests.length, 5) - 1 && ','}
-                  </span>
-                ))}
-                {chatUser.user_interests.length > 5 && (
-                  <span className="text-purple-600">+{chatUser.user_interests.length - 5} más</span>
-                )}
+      {/* Intereses - Parte del área scrolleable */}
+      <div className="flex-1 overflow-y-auto" style={{ height: 'calc(100vh - 144px)' }}>
+        {chatUser.user_interests.length > 0 && (
+          <div className="bg-gradient-to-r from-purple-100 to-green-100 border-b border-white/20 sticky top-0 z-10">
+            <div className="max-w-4xl mx-auto px-4 py-3">
+              <div className="flex items-center space-x-2 text-sm">
+                <Heart className="h-4 w-4 text-purple-600" />
+                <span className="text-purple-700 font-medium">Intereses:</span>
+                <div className="flex flex-wrap gap-2">
+                  {chatUser.user_interests.slice(0, 5).map((userInterest, index) => (
+                    <span key={index} className="text-purple-600">
+                      {userInterest.interests.name}
+                      {index < Math.min(chatUser.user_interests.length, 5) - 1 && ','}
+                    </span>
+                  ))}
+                  {chatUser.user_interests.length > 5 && (
+                    <span className="text-purple-600">+{chatUser.user_interests.length - 5} más</span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Área de Mensajes */}
-      <div className="flex-1 overflow-y-auto">
+        {/* Área de Mensajes */}
         <div className="max-w-4xl mx-auto px-4 py-6">
           {hasMore && (
             <div className="text-center mb-4">
@@ -862,8 +953,8 @@ export default function ChatPage() {
         </div>
       </div>
 
-      {/* Input de Mensaje */}
-      <div className="bg-white/80 backdrop-blur-sm border-t border-white/20">
+      {/* Input de Mensaje - Fijo */}
+      <div className="bg-white/80 backdrop-blur-sm border-t border-white/20 sticky bottom-0 z-50">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex space-x-4">
             <div className="flex-1 flex space-x-4">

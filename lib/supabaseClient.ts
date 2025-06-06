@@ -192,59 +192,75 @@ export const getUserInterests = async (userId: string) => {
 export const getAllUsers = async (): Promise<UserWithInterests[]> => {
   const client = createClientComponentClient();
 
-  // Primero obtener todos los usuarios
-  const { data: users, error: usersError } = await client
-    .from('profiles')
-    .select('id,email,full_name,avatar_url,created_at,updated_at,career,description');
+  try {
+    // Primero obtener todos los usuarios
+    const { data: users, error: usersError } = await client
+      .from('profiles')
+      .select('id,email,full_name,avatar_url,created_at,updated_at,career,description');
 
-  if (usersError) {
-    console.error('❌ Error obteniendo usuarios:', usersError);
-    throw usersError;
+    if (usersError) {
+      console.error('❌ Error obteniendo usuarios');
+      throw usersError;
+    }
+
+    // Verificar la tabla user_interests directamente usando una vista pública
+    const { data: userInterestsCheck, error: checkError } = await client
+      .from('public_user_interests_view')
+      .select('*');
+
+    if (checkError) {
+      console.error('❌ Error en verificación de user_interests');
+    }
+
+    // Obtener todos los intereses de una vez
+    const { data: allInterests, error: allInterestsError } = await client
+      .from('interests')
+      .select('*');
+
+    if (allInterestsError) {
+      console.error('❌ Error obteniendo todos los intereses');
+      throw allInterestsError;
+    }
+
+    // Obtener todas las relaciones user_interests usando la vista pública
+    const { data: allUserInterests, error: userInterestsError } = await client
+      .from('public_user_interests_view')
+      .select('*');
+
+    if (userInterestsError) {
+      console.error('❌ Error obteniendo relaciones user_interests');
+      throw userInterestsError;
+    }
+
+    // Para cada usuario, procesar sus intereses
+    const usersWithInterests = users.map(user => {
+      // Encontrar los interest_ids para este usuario
+      const userInterestIds = allUserInterests
+        .filter(ui => ui.user_id === user.id)
+        .map(ui => ui.interest_id);
+
+      // Encontrar los intereses completos
+      const interests = allInterests
+        .filter(interest => userInterestIds.includes(interest.id));
+
+      // Extraer nombres y categorías únicas de intereses
+      const interest_names = interests.map(i => i.name);
+      const interest_categories = [...new Set(interests.map(i => i.category))];
+
+      return {
+        ...user,
+        interests_count: interests.length,
+        interest_names,
+        interest_categories,
+        interests
+      };
+    });
+
+    return usersWithInterests;
+  } catch (error) {
+    console.error('❌ Error general en getAllUsers');
+    throw error;
   }
-
-  // Para cada usuario, obtener sus intereses
-  const usersWithInterests = await Promise.all(users.map(async (user) => {
-    const { data: userInterests } = await client
-      .from('user_interests')
-      .select(`
-        interests (
-          id,
-          name,
-          category,
-          created_at
-        )
-      `)
-      .eq('user_id', user.id);
-
-    // Procesar los intereses
-    const interests: Interest[] = (userInterests || [])
-      .map((ui: any) => ui.interests)
-      .filter((interest): interest is Interest => interest !== null);
-
-    // Extraer nombres y categorías únicas de intereses
-    const interest_names = interests.map(i => i.name);
-    const interest_categories = [...new Set(interests.map(i => i.category))];
-
-    return {
-      ...user,
-      interests_count: interests.length,
-      interest_names,
-      interest_categories,
-      interests
-    };
-  }));
-
-  console.log('✅ Usuarios con intereses cargados:', {
-    count: usersWithInterests.length,
-    users: usersWithInterests.map(u => ({
-      id: u.id,
-      name: u.full_name,
-      interestsCount: u.interests_count,
-      interests: u.interest_names
-    }))
-  });
-
-  return usersWithInterests;
 }
 
 export const getUserMatches = async (userId: string): Promise<{ userId: string; compatibility_score: number }[]> => {

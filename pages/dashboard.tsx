@@ -123,22 +123,8 @@ export default function ImprovedDashboard({ initialSession, user, profile }: {
         return
       }
 
-      console.log('✅ Cargando datos para usuario:', {
-        id: currentUser.id,
-        email: currentUser.email
-      })
-
       // Verificar si el usuario tiene intereses
       const userInterests = await getUserInterests(currentUser.id)
-      console.log('🔍 Verificando intereses del usuario:', {
-        userId: currentUser.id,
-        interestsCount: userInterests?.length || 0,
-        interests: userInterests?.map(ui => ({
-          id: ui.interest?.id,
-          name: ui.interest?.name,
-          category: ui.interest?.category
-        }))
-      })
 
       // Verificación adicional directa a la base de datos
       const { data: directCheck, error: directError } = await supabase
@@ -146,36 +132,24 @@ export default function ImprovedDashboard({ initialSession, user, profile }: {
         .select('*')
         .eq('user_id', currentUser.id)
 
-      console.log('🔍 Verificación directa de intereses:', {
-        count: directCheck?.length || 0,
-        error: directError
-      })
-
       // Solo redirigir si realmente estamos seguros de que no hay intereses
       if ((!userInterests || userInterests.length === 0) && (!directCheck || directCheck.length === 0)) {
-        console.log('⚠️ Usuario sin intereses confirmado, redirigiendo al quiz...')
         router.push('/interests-quiz')
         return
       }
-
-      // Si llegamos aquí, el usuario tiene intereses
-      console.log('✅ Usuario tiene intereses:', {
-        fromJoin: userInterests?.length || 0,
-        fromDirect: directCheck?.length || 0
-      })
 
       // Cargar usuarios con sistema de compatibilidad
       try {
         await loadUsersWithCompatibility(currentUser.id)
       } catch (usersError) {
-        console.error('Error loading users with compatibility:', usersError)
+        console.error('Error loading users with compatibility')
       }
 
       // Cargar categorías de intereses
       try {
         await loadInterestCategories()
       } catch (categoriesError) {
-        console.error('Error loading interest categories:', categoriesError)
+        console.error('Error loading interest categories')
       }
 
       // Cargar mensajes no leídos
@@ -189,11 +163,11 @@ export default function ImprovedDashboard({ initialSession, user, profile }: {
         if (messagesError) throw messagesError
         setUnreadMessages(count || 0)
       } catch (messagesError) {
-        console.error('Error loading unread messages:', messagesError)
+        console.error('Error loading unread messages')
       }
 
     } catch (error) {
-      console.error('Error loading data:', error)
+      console.error('Error loading data')
     } finally {
       setLoading(false)
     }
@@ -205,23 +179,10 @@ export default function ImprovedDashboard({ initialSession, user, profile }: {
 
   const loadUsersWithCompatibility = async (currentUserId: string) => {
     try {
-      console.log('🔍 Iniciando carga de usuarios con compatibilidad para:', currentUserId);
-      
       // Obtener todos los usuarios
       const allUsers = await getAllUsers();
-      console.log('👥 Usuarios obtenidos:', {
-        count: allUsers?.length || 0,
-        users: allUsers?.map(u => ({
-          id: u.id,
-          email: u.email,
-          name: u.full_name,
-          interestsCount: u.interests_count,
-          interests: u.interest_names
-        }))
-      });
 
       if (!allUsers) {
-        console.error('❌ getAllUsers returned null or undefined');
         setUsers([]);
         return;
       }
@@ -233,36 +194,20 @@ export default function ImprovedDashboard({ initialSession, user, profile }: {
         .or(`user1_id.eq.${currentUserId},user2_id.eq.${currentUserId}`)
         .order('compatibility_score', { ascending: false });
 
-      console.log('🤝 Matches encontrados:', {
-        count: matches?.length || 0,
-        matches: matches?.map(m => ({
-          user1: m.user1_id,
-          user2: m.user2_id,
-          score: m.compatibility_score
-        }))
-      });
-
       if (matchesError) {
-        console.error('❌ Error obteniendo matches:', matchesError);
         throw matchesError;
       }
 
       // Obtener los intereses del usuario actual
       const currentUserData = allUsers.find(u => u.id === currentUserId);
-      const currentUserInterests = currentUserData?.interests || [];
-      
-      console.log('📋 Intereses del usuario actual:', {
-        userId: currentUserId,
-        count: currentUserInterests.length,
-        interests: currentUserInterests.map(i => ({
-          id: i.id,
-          name: i.name,
-          category: i.category
-        }))
-      });
+      if (!currentUserData) {
+        setUsers([]);
+        return;
+      }
+
+      const currentUserInterests = currentUserData.interests || [];
 
       // Filtrar usuarios y añadir puntuación de compatibilidad e intereses
-      console.log('⚙️ Procesando usuarios y calculando compatibilidad...');
       const filteredUsers = allUsers
         .filter(u => u.id !== currentUserId)
         .map((user) => {
@@ -280,22 +225,12 @@ export default function ImprovedDashboard({ initialSession, user, profile }: {
             currentUserInterests.some(cui => cui.id === interest.id)
           );
 
-          console.log('👤 Procesando usuario:', {
-            userId: user.id,
-            name: user.full_name,
-            interestsCount: userInterests.length,
-            sharedInterestsCount: sharedInterests.length,
-            matchScore: match?.compatibility_score || 0,
-            categories: user.interest_categories,
-            interests: user.interest_names
-          });
-
           const userWithInterests: UserWithInterests = {
             ...user,
             compatibility_score: match?.compatibility_score || 0,
             shared_interests: sharedInterests,
-            interest_names: user.interest_names,
-            interest_categories: user.interest_categories,
+            interest_names: user.interest_names || [],
+            interest_categories: user.interest_categories || [],
             interests_count: userInterests.length
           };
 
@@ -305,7 +240,6 @@ export default function ImprovedDashboard({ initialSession, user, profile }: {
 
       // Encontrar el usuario con la puntuación más alta
       const maxCompatibilityScore = Math.max(...filteredUsers.map(u => u.compatibility_score || 0));
-      console.log('🏆 Puntuación máxima de compatibilidad:', maxCompatibilityScore);
       
       // Marcar como top match solo si tiene la puntuación más alta y es >= 70
       const usersWithTopMatch = filteredUsers.map((user, index) => ({
@@ -313,16 +247,9 @@ export default function ImprovedDashboard({ initialSession, user, profile }: {
         isTopMatch: user.compatibility_score === maxCompatibilityScore && user.compatibility_score >= 70 && index === 0
       }));
 
-      console.log('✅ Proceso completado:', {
-        totalUsers: usersWithTopMatch.length,
-        usersWithInterests: usersWithTopMatch.filter(u => u.interests_count > 0).length,
-        usersWithSharedInterests: usersWithTopMatch.filter(u => u.shared_interests.length > 0).length,
-        topMatches: usersWithTopMatch.filter(u => u.isTopMatch).length
-      });
-
       setUsers(usersWithTopMatch);
     } catch (error) {
-      console.error('❌ Error cargando usuarios con compatibilidad:', error);
+      console.error('Error loading users with compatibility');
       setUsers([]);
     }
   };
