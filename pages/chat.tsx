@@ -11,6 +11,10 @@ interface Message {
   content: string
   created_at: string
   read: boolean
+  edited: boolean
+  deleted: boolean
+  reactions: { [key: string]: string[] } // emoji: userId[]
+  image_url?: string
 }
 
 interface ChatUser {
@@ -21,6 +25,8 @@ interface ChatUser {
   user_interests: Array<{
     interests: { name: string; category: string }
   }>
+  last_seen: string
+  is_typing: boolean
 }
 
 export default function ChatPage() {
@@ -41,18 +47,107 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
   const [isOnline, setIsOnline] = useState(false)
+  const [isTyping, setIsTyping] = useState(false)
+  const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null)
+  const [selectedEmoji, setSelectedEmoji] = useState<number | null>(null)
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false)
+  const [editingMessage, setEditingMessage] = useState<number | null>(null)
+  const [editContent, setEditContent] = useState('')
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [page, setPage] = useState(1)
+  const [hasMore, setHasMore] = useState(true)
+  const MESSAGES_PER_PAGE = 20
 
   useEffect(() => {
     console.log('Debug user in useEffect:', user)
     if (userId && user) {
       loadChatData()
       setupRealtimeSubscription()
+      updateUserPresence()
     }
   }, [userId, user])
 
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  // Actualizar presencia del usuario cada 30 segundos
+  useEffect(() => {
+    if (!user) return
+
+    const interval = setInterval(updateUserPresence, 30000)
+    return () => clearInterval(interval)
+  }, [user])
+
+  const updateUserPresence = async () => {
+    if (!user) return
+
+    try {
+      await supabase
+        .from('profiles')
+        .update({ last_seen: new Date().toISOString() })
+        .eq('id', user.id)
+    } catch (error) {
+      console.error('Error updating presence:', error)
+    }
+  }
+
+  const loadMoreMessages = async () => {
+    if (!hasMore || loading) return;
+    
+    try {
+      const from = page * MESSAGES_PER_PAGE;
+      const to = from + MESSAGES_PER_PAGE - 1;
+      
+      const { data: newMessages, error } = await supabase
+        .from('messages')
+        .select('*')
+        .or(`and(sender_id.eq.${user?.id},receiver_id.eq.${userId}),and(sender_id.eq.${userId},receiver_id.eq.${user?.id})`)
+        .order('created_at', { ascending: false })
+        .range(from, to);
+
+      if (error) throw error;
+
+      if (newMessages) {
+        if (newMessages.length < MESSAGES_PER_PAGE) {
+          setHasMore(false);
+        }
+        setMessages(prev => [...prev, ...newMessages.reverse()]);
+        setPage(p => p + 1);
+      }
+    } catch (error) {
+      console.error('Error loading more messages:', error);
+    }
+  };
+
+  const loadInitialMessages = async () => {
+    try {
+      const { data: messagesData, error: messagesError } = await supabase
+        .from('messages')
+        .select('*')
+        .or(`and(sender_id.eq.${user?.id},receiver_id.eq.${userId}),and(sender_id.eq.${userId},receiver_id.eq.${user?.id})`)
+        .order('created_at', { ascending: false })
+        .limit(MESSAGES_PER_PAGE);
+
+      if (messagesError) throw messagesError;
+      
+      if (messagesData) {
+        setMessages(messagesData.reverse());
+        setHasMore(messagesData.length === MESSAGES_PER_PAGE);
+      }
+
+      // Marcar mensajes como leídos
+      await supabase
+        .from('messages')
+        .update({ read: true })
+        .eq('sender_id', userId)
+        .eq('receiver_id', user?.id)
+        .eq('read', false);
+
+    } catch (error) {
+      console.error('Error loading initial messages:', error);
+    }
+  };
 
   const loadChatData = async () => {
     try {
@@ -74,10 +169,10 @@ export default function ChatPage() {
       if (profileError) throw profileError
       setCurrentProfile(profileData)
 
-      // Cargar información del usuario del chat (sin user_interests para debug)
+      // Cargar información del usuario del chat
       const { data: chatUserData, error: userError } = await supabase
         .from('profiles')
-        .select('id, email, full_name, avatar_url')
+        .select('id, email, full_name, avatar_url, last_seen')
         .eq('id', userId)
         .single()
 
@@ -94,41 +189,32 @@ export default function ChatPage() {
           console.error('Error fetching user interests:', interestsError)
           setChatUser({
             ...chatUserData,
-            user_interests: []
+            user_interests: [],
+            is_typing: false,
+            last_seen: chatUserData.last_seen || new Date().toISOString()
           })
         } else {
-          // Fix type mismatch: transform interests array to single object if needed
           const fixedUserInterests = userInterestsData.map((ui: any) => ({
             ...ui,
             interests: Array.isArray(ui.interests) ? ui.interests[0] : ui.interests
           }))
           setChatUser({
             ...chatUserData,
-            user_interests: fixedUserInterests
+            user_interests: fixedUserInterests,
+            is_typing: false,
+            last_seen: chatUserData.last_seen || new Date().toISOString()
           })
         }
+
+        // Verificar si el usuario está en línea (últimos 2 minutos)
+        const lastSeen = new Date(chatUserData.last_seen)
+        const now = new Date()
+        setIsOnline(now.getTime() - lastSeen.getTime() < 120000)
       } else {
         setChatUser(null)
       }
 
-      // Cargar mensajes
-      const { data: messagesData, error: messagesError } = await supabase
-        .from('messages')
-        .select('*')
-        .or(`and(sender_id.eq.${user.id},receiver_id.eq.${userId}),and(sender_id.eq.${userId},receiver_id.eq.${user.id})`)
-        .order('created_at', { ascending: true })
-
-      if (messagesError) throw messagesError
-      setMessages(messagesData || [])
-
-      // Marcar mensajes como leídos
-      await supabase
-        .from('messages')
-        .update({ read: true })
-        .eq('sender_id', userId)
-        .eq('receiver_id', user.id)
-        .eq('read', false)
-
+      await loadInitialMessages();
     } catch (error) {
       console.error('Error loading chat data:', error)
       console.log('Debug userId:', userId)
@@ -139,7 +225,8 @@ export default function ChatPage() {
   }
 
   const setupRealtimeSubscription = () => {
-    const channel = supabase
+    // Canal para mensajes
+    const messagesChannel = supabase
       .channel('messages')
       .on(
         'postgres_changes',
@@ -149,14 +236,66 @@ export default function ChatPage() {
           table: 'messages',
           filter: `or(and(sender_id.eq.${currentUser?.id},receiver_id.eq.${userId}),and(sender_id.eq.${userId},receiver_id.eq.${currentUser?.id}))`
         },
-        (payload) => {
+        async (payload) => {
           console.log('Realtime payload received:', payload)
+          
+          // Para inserciones de nuevos mensajes
           if (payload.eventType === 'INSERT') {
-            setMessages(prev => [...prev, payload.new as Message])
+            const newMessage = payload.new as Message
+            setMessages(prev => {
+              // Evitar duplicados
+              if (prev.some(m => m.id === newMessage.id)) return prev
+              return [...prev, newMessage]
+            })
             
             // Marcar como leído si es mensaje recibido
-            if (payload.new.sender_id === userId) {
-              markAsRead(payload.new.id)
+            if (newMessage.sender_id === userId) {
+              await markAsRead(newMessage.id)
+            }
+          } 
+          // Para actualizaciones (ediciones, eliminaciones, reacciones)
+          else if (payload.eventType === 'UPDATE') {
+            const updatedMessage = payload.new as Message
+            setMessages(prev => prev.map(msg => 
+              msg.id === updatedMessage.id ? updatedMessage : msg
+            ))
+
+            // Si el mensaje fue marcado como leído y es nuestro
+            if (updatedMessage.read && updatedMessage.sender_id === currentUser?.id) {
+              console.log('Mensaje marcado como leído:', updatedMessage)
+            }
+          }
+        }
+      )
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.log('Subscribed to messages channel')
+        }
+      })
+
+    // Canal para estado de escritura y presencia
+    const presenceChannel = supabase
+      .channel('presence')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles',
+          filter: `id.eq.${userId}`
+        },
+        (payload) => {
+          if (payload.new) {
+            const lastSeen = new Date(payload.new.last_seen)
+            const now = new Date()
+            setIsOnline(now.getTime() - lastSeen.getTime() < 120000)
+            
+            if (chatUser) {
+              setChatUser(prev => prev ? {
+                ...prev,
+                is_typing: payload.new.is_typing || false,
+                last_seen: payload.new.last_seen
+              } : null)
             }
           }
         }
@@ -164,15 +303,51 @@ export default function ChatPage() {
       .subscribe()
 
     return () => {
-      supabase.removeChannel(channel)
+      supabase.removeChannel(messagesChannel)
+      supabase.removeChannel(presenceChannel)
     }
   }
 
+  const handleTyping = () => {
+    if (!user) return
+
+    // Actualizar estado de escritura
+    supabase
+      .from('profiles')
+      .update({ is_typing: true })
+      .eq('id', user.id)
+      .then(() => {
+        // Limpiar timeout anterior si existe
+        if (typingTimeout) {
+          clearTimeout(typingTimeout)
+        }
+
+        // Establecer nuevo timeout para desactivar el estado de escritura
+        const timeout = setTimeout(async () => {
+          await supabase
+            .from('profiles')
+            .update({ is_typing: false })
+            .eq('id', user.id)
+        }, 2000)
+
+        setTypingTimeout(timeout)
+      })
+  }
+
   const markAsRead = async (messageId: number) => {
-    await supabase
-      .from('messages')
-      .update({ read: true })
-      .eq('id', messageId)
+    try {
+      const { error } = await supabase
+        .from('messages')
+        .update({ read: true })
+        .eq('id', messageId)
+        .select()
+
+      if (error) {
+        console.error('Error marking message as read:', error)
+      }
+    } catch (error) {
+      console.error('Error in markAsRead:', error)
+    }
   }
 
   const sendMessage = async (e: React.FormEvent | React.MouseEvent) => {
@@ -227,6 +402,180 @@ export default function ChatPage() {
       })
     }
   }
+
+  const handleReaction = async (messageId: number, emoji: string) => {
+    if (!user || !messages) return
+
+    try {
+      const message = messages.find(m => m.id === messageId)
+      if (!message) return
+
+      const reactions = { ...message.reactions }
+      const userReactions = reactions[emoji] || []
+
+      if (userReactions.includes(user.id)) {
+        // Remover reacción
+        reactions[emoji] = userReactions.filter(id => id !== user.id)
+        if (reactions[emoji].length === 0) {
+          delete reactions[emoji]
+        }
+      } else {
+        // Añadir reacción
+        reactions[emoji] = [...userReactions, user.id]
+      }
+
+      const { error } = await supabase
+        .from('messages')
+        .update({ reactions })
+        .eq('id', messageId)
+        .select()
+
+      if (error) throw error
+
+      // Actualizar el mensaje localmente
+      setMessages(prev => prev.map(msg => 
+        msg.id === messageId 
+          ? { ...msg, reactions }
+          : msg
+      ))
+    } catch (error) {
+      console.error('Error updating reaction:', error)
+      alert('Error al actualizar la reacción')
+    }
+  }
+
+  const handleEditMessage = async (messageId: number) => {
+    const message = messages.find(m => m.id === messageId)
+    if (!message || message.sender_id !== user?.id) return
+
+    setEditingMessage(messageId)
+    setEditContent(message.content)
+    setShowEmojiPicker(false)
+  }
+
+  const saveEditMessage = async () => {
+    if (!editingMessage || !editContent.trim()) return
+
+    try {
+      const { error } = await supabase
+        .from('messages')
+        .update({ 
+          content: editContent.trim(),
+          edited: true 
+        })
+        .eq('id', editingMessage)
+
+      if (error) throw error
+
+      // Refrescar mensajes después de editar
+      await refreshMessages()
+
+      setEditingMessage(null)
+      setEditContent('')
+    } catch (error) {
+      console.error('Error editing message:', error)
+      alert('Error al editar el mensaje')
+    }
+  }
+
+  const handleDeleteMessage = async (messageId: number) => {
+    const message = messages.find(m => m.id === messageId)
+    if (!message || message.sender_id !== user?.id) return
+
+    try {
+      const { error } = await supabase
+        .from('messages')
+        .update({ 
+          deleted: true,
+          content: 'Este mensaje fue eliminado'
+        })
+        .eq('id', messageId)
+
+      if (error) throw error
+
+      // Refrescar mensajes después de eliminar
+      await refreshMessages()
+
+      if (editingMessage === messageId) {
+        setEditingMessage(null)
+        setEditContent('')
+      }
+    } catch (error) {
+      console.error('Error deleting message:', error)
+      alert('Error al eliminar el mensaje')
+    }
+  }
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file || !user) return
+
+    try {
+      setSending(true)
+      
+      // Subir imagen a Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabase
+        .storage
+        .from('chat-images')
+        .upload(`${user.id}/${Date.now()}-${file.name}`, file)
+
+      if (uploadError) throw uploadError
+
+      // Obtener URL pública de la imagen
+      const { data: { publicUrl } } = supabase
+        .storage
+        .from('chat-images')
+        .getPublicUrl(uploadData.path)
+
+      // Enviar mensaje con la imagen
+      await supabase
+        .from('messages')
+        .insert({
+          sender_id: user.id,
+          receiver_id: userId,
+          content: '📷 Imagen',
+          image_url: publicUrl
+        })
+
+    } catch (error) {
+      console.error('Error uploading image:', error)
+      alert('Error al subir la imagen')
+    } finally {
+      setSending(false)
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    }
+  }
+
+  // Función para cargar el estado actual de los mensajes
+  const refreshMessages = async () => {
+    try {
+      const { data: messagesData, error: messagesError } = await supabase
+        .from('messages')
+        .select('*')
+        .or(`and(sender_id.eq.${user?.id},receiver_id.eq.${userId}),and(sender_id.eq.${userId},receiver_id.eq.${user?.id})`)
+        .order('created_at', { ascending: true })
+
+      if (messagesError) throw messagesError
+
+      if (messagesData) {
+        setMessages(messagesData)
+      }
+    } catch (error) {
+      console.error('Error refreshing messages:', error)
+    }
+  }
+
+  // Añadir un efecto para refrescar los mensajes periódicamente
+  useEffect(() => {
+    if (!user || !userId) return
+
+    // Refrescar mensajes cada 30 segundos
+    const interval = setInterval(refreshMessages, 30000)
+
+    return () => clearInterval(interval)
+  }, [user, userId])
 
   if (loading) {
     return (
@@ -336,6 +685,17 @@ export default function ChatPage() {
       {/* Área de Mensajes */}
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-4xl mx-auto px-4 py-6">
+          {hasMore && (
+            <div className="text-center mb-4">
+              <button
+                onClick={loadMoreMessages}
+                className="bg-white/60 backdrop-blur-sm px-4 py-2 rounded-full text-sm text-purple-600 hover:bg-white/80 transition-colors"
+              >
+                Cargar mensajes anteriores
+              </button>
+            </div>
+          )}
+          
           {messages.length === 0 ? (
             <div className="text-center py-12">
               <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-8 max-w-md mx-auto">
@@ -368,21 +728,128 @@ export default function ChatPage() {
                     )}
                     
                     <div className={`flex ${isFromCurrentUser ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
+                      <div className={`max-w-xs lg:max-w-md ${
                         isFromCurrentUser
                           ? 'bg-gradient-to-r from-purple-600 to-green-600 text-white'
                           : 'bg-white/80 backdrop-blur-sm text-gray-900 shadow-sm'
-                      }`}>
-                        <p className="text-sm">{message.content}</p>
-                        <div className={`text-xs mt-1 ${
-                          isFromCurrentUser ? 'text-purple-100' : 'text-gray-500'
-                        }`}>
-                          {formatTime(message.created_at)}
-                          {isFromCurrentUser && (
-                            <span className="ml-2">
-                              {message.read ? '✓✓' : '✓'}
-                            </span>
+                      } rounded-2xl relative group`}>
+                        
+                        {/* Menú de opciones para mensajes propios */}
+                        {isFromCurrentUser && !message.deleted && (
+                          <div className="absolute -right-20 top-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center space-x-2 bg-white/90 backdrop-blur-sm rounded-lg p-1 shadow-lg">
+                            {editingMessage === message.id ? (
+                              <button
+                                onClick={saveEditMessage}
+                                className="p-2 hover:bg-purple-100 rounded-lg transition-colors flex items-center space-x-1"
+                                title="Guardar cambios"
+                              >
+                                <span>✅</span>
+                                <span className="text-xs text-gray-600">Guardar</span>
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => handleEditMessage(message.id)}
+                                className="p-2 hover:bg-purple-100 rounded-lg transition-colors flex items-center space-x-1"
+                                title="Editar mensaje"
+                              >
+                                <span>✏️</span>
+                                <span className="text-xs text-gray-600">Editar</span>
+                              </button>
+                            )}
+                            <button
+                              onClick={() => {
+                                if (window.confirm('¿Estás seguro de que quieres eliminar este mensaje?')) {
+                                  handleDeleteMessage(message.id);
+                                }
+                              }}
+                              className="p-2 hover:bg-red-100 rounded-lg transition-colors flex items-center space-x-1"
+                              title="Eliminar mensaje"
+                            >
+                              <span>🗑️</span>
+                              <span className="text-xs text-gray-600">Eliminar</span>
+                            </button>
+                          </div>
+                        )}
+
+                        <div className="px-4 py-2">
+                          {/* Contenido del mensaje */}
+                          {message.deleted ? (
+                            <p className="text-sm italic opacity-60">Mensaje eliminado</p>
+                          ) : editingMessage === message.id ? (
+                            <div className="flex flex-col space-y-2">
+                              <textarea
+                                value={editContent}
+                                onChange={(e) => setEditContent(e.target.value)}
+                                className="w-full px-2 py-1 rounded bg-white/20 text-white placeholder-white/60 resize-none focus:outline-none focus:ring-2 focus:ring-white/50"
+                                placeholder="Editar mensaje..."
+                                rows={2}
+                                onKeyPress={(e) => {
+                                  if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault();
+                                    saveEditMessage();
+                                  }
+                                }}
+                              />
+                              <div className="flex justify-between items-center text-xs">
+                                <span className="opacity-75">Presiona Enter para guardar</span>
+                                <button
+                                  onClick={() => {
+                                    setEditingMessage(null);
+                                    setEditContent('');
+                                  }}
+                                  className="hover:underline"
+                                >
+                                  Cancelar
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <>
+                              <p className="text-sm break-words whitespace-pre-wrap">
+                                {message.content}
+                              </p>
+                              {message.image_url && (
+                                <img
+                                  src={message.image_url}
+                                  alt="Imagen compartida"
+                                  className="mt-2 rounded-lg max-w-full"
+                                  loading="lazy"
+                                />
+                              )}
+                            </>
                           )}
+
+                          {/* Reacciones */}
+                          {!message.deleted && Object.keys(message.reactions || {}).length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {Object.entries(message.reactions).map(([emoji, users]) => (
+                                <button
+                                  key={emoji}
+                                  onClick={() => handleReaction(message.id, emoji)}
+                                  className={`px-2 py-0.5 rounded-full text-xs ${
+                                    users.includes(user?.id || '')
+                                      ? 'bg-white/20'
+                                      : 'bg-white/10'
+                                  } hover:bg-white/30 transition-colors`}
+                                >
+                                  {emoji} {users.length}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Metadata del mensaje */}
+                          <div className={`text-xs mt-1 flex items-center space-x-2 ${
+                            isFromCurrentUser ? 'text-purple-100' : 'text-gray-500'
+                          }`}>
+                            <span>{formatTime(message.created_at)}</span>
+                            {message.edited && <span className="opacity-60">(editado)</span>}
+                            {isFromCurrentUser && (
+                              <span>
+                                {message.read ? '✓✓' : '✓'}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -399,36 +866,127 @@ export default function ChatPage() {
       <div className="bg-white/80 backdrop-blur-sm border-t border-white/20">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex space-x-4">
-            <div className="flex-1">
-              <input
-                type="text"
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="Escribe un mensaje..."
-                className="w-full px-4 py-3 bg-gray-50 text-gray-900 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                disabled={sending}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault()
-                    sendMessage(e)
-                  }
-                }}
-              />
+            <div className="flex-1 flex space-x-4">
+              <div className="flex-1">
+                <input
+                  type="text"
+                  value={editingMessage ? editContent : newMessage}
+                  onChange={(e) => {
+                    if (editingMessage) {
+                      setEditContent(e.target.value)
+                    } else {
+                      setNewMessage(e.target.value)
+                      handleTyping()
+                    }
+                  }}
+                  placeholder={editingMessage ? "Editar mensaje..." : "Escribe un mensaje..."}
+                  className="w-full px-4 py-3 bg-gray-50 text-gray-900 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  disabled={sending}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault()
+                      if (editingMessage) {
+                        saveEditMessage()
+                      } else {
+                        sendMessage(e)
+                      }
+                    }
+                  }}
+                />
+              </div>
+
+              {/* Botones de acciones */}
+              <div className="flex items-center space-x-2">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImageUpload}
+                  accept="image/*"
+                  className="hidden"
+                />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={sending}
+                  className="p-3 rounded-2xl bg-gray-100 hover:bg-gray-200 transition-colors"
+                >
+                  📷
+                </button>
+                <button
+                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                  className="p-3 rounded-2xl bg-gray-100 hover:bg-gray-200 transition-colors"
+                >
+                  😊
+                </button>
+              </div>
             </div>
+
             <button
-              onClick={sendMessage}
-              disabled={!newMessage.trim() || sending}
+              onClick={editingMessage ? saveEditMessage : sendMessage}
+              disabled={(!newMessage.trim() && !editingMessage) || sending}
               className="bg-gradient-to-r from-purple-600 to-green-600 text-white p-3 rounded-2xl hover:from-purple-700 hover:to-green-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {sending ? (
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+              ) : editingMessage ? (
+                '✓'
               ) : (
                 <Send className="h-5 w-5" />
               )}
             </button>
           </div>
+
+          {/* Selector de emojis */}
+          {showEmojiPicker && (
+            <div className="absolute bottom-20 right-4 bg-white rounded-lg shadow-lg p-2">
+              <div className="grid grid-cols-8 gap-1">
+                {['👍', '❤️', '😊', '😂', '😍', '🎉', '👏', '🔥'].map(emoji => (
+                  <button
+                    key={emoji}
+                    onClick={() => {
+                      if (selectedEmoji) {
+                        handleReaction(selectedEmoji, emoji)
+                        setSelectedEmoji(null)
+                      } else {
+                        setNewMessage(prev => prev + emoji)
+                      }
+                      setShowEmojiPicker(false)
+                    }}
+                    className="p-2 hover:bg-gray-100 rounded"
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Estilos para el indicador de escritura */}
+      <style jsx>{`
+        .typing-indicator {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 2px;
+        }
+        
+        .typing-indicator span {
+          width: 4px;
+          height: 4px;
+          background-color: #6B7280;
+          border-radius: 50%;
+          animation: bounce 1.4s infinite ease-in-out;
+        }
+        
+        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes bounce {
+          0%, 80%, 100% { transform: scale(0); }
+          40% { transform: scale(1); }
+        }
+      `}</style>
     </div>
   )
 }
