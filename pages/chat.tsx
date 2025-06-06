@@ -682,7 +682,7 @@ export default function ChatPage() {
         <div className="text-center">
           <h2 className="text-2xl font-bold text-white mb-4">Usuario no encontrado</h2>
           <button
-            onClick={() => router.push('/dashboard')}
+            onClick={() => router.push('/conversations')}
             className="bg-gradient-to-r from-[#7289da] to-[#6cf0c8] text-white px-6 py-3 rounded-lg hover:opacity-90 transition-opacity"
           >
             Volver al Dashboard
@@ -700,7 +700,7 @@ export default function ChatPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <button
-                onClick={() => router.push('/dashboard')}
+                onClick={() => router.push('/conversations')}
                 className="mr-4 p-2 hover:bg-[#7289da]/20 rounded-full transition-colors"
               >
                 <ArrowLeft className="h-5 w-5 text-[#7289da]" />
@@ -827,38 +827,47 @@ export default function ChatPage() {
                         
                         {/* Menú de opciones para mensajes propios */}
                         {isFromCurrentUser && !message.deleted && (
-                          <div className="absolute -right-20 top-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center space-x-2 bg-[#464758]/90 backdrop-blur-sm rounded-lg p-1 shadow-lg">
-                            {editingMessage === message.id ? (
-                              <button
-                                onClick={saveEditMessage}
-                                className="p-2 hover:bg-[#7289da]/20 rounded-lg transition-colors flex items-center space-x-1"
-                                title="Guardar cambios"
-                              >
-                                <span>✅</span>
-                                <span className="text-xs text-gray-300">Guardar</span>
-                              </button>
-                            ) : (
-                              <button
-                                onClick={() => handleEditMessage(message.id)}
-                                className="p-2 hover:bg-[#7289da]/20 rounded-lg transition-colors flex items-center space-x-1"
-                                title="Editar mensaje"
-                              >
-                                <span>✏️</span>
-                                <span className="text-xs text-gray-300">Editar</span>
-                              </button>
-                            )}
+                          <div className="absolute -right-2 top-2">
                             <button
-                              onClick={() => {
-                                if (window.confirm('¿Estás seguro de que quieres eliminar este mensaje?')) {
-                                  handleDeleteMessage(message.id);
-                                }
-                              }}
-                              className="p-2 hover:bg-red-500/20 rounded-lg transition-colors flex items-center space-x-1"
-                              title="Eliminar mensaje"
+                              onClick={() => setSelectedEmoji(selectedEmoji === message.id ? null : message.id)}
+                              className="p-1 hover:bg-[#7289da]/20 rounded-lg transition-colors"
                             >
-                              <span>🗑️</span>
-                              <span className="text-xs text-gray-300">Eliminar</span>
+                              <MoreVertical className="h-4 w-4 text-white/60" />
                             </button>
+                            
+                            {selectedEmoji === message.id && (
+                              <div className="absolute right-0 top-8 bg-[#464758]/90 backdrop-blur-sm rounded-lg p-2 shadow-lg min-w-[120px] z-50">
+                                {editingMessage === message.id ? (
+                                  <button
+                                    onClick={saveEditMessage}
+                                    className="w-full p-2 hover:bg-[#7289da]/20 rounded-lg transition-colors flex items-center space-x-2 text-left"
+                                  >
+                                    <span>✅</span>
+                                    <span className="text-sm text-gray-300">Guardar</span>
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={() => handleEditMessage(message.id)}
+                                    className="w-full p-2 hover:bg-[#7289da]/20 rounded-lg transition-colors flex items-center space-x-2 text-left"
+                                  >
+                                    <span>✏️</span>
+                                    <span className="text-sm text-gray-300">Editar</span>
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() => {
+                                    if (window.confirm('¿Estás seguro de que quieres eliminar este mensaje?')) {
+                                      handleDeleteMessage(message.id);
+                                      setSelectedEmoji(null);
+                                    }
+                                  }}
+                                  className="w-full p-2 hover:bg-red-500/20 rounded-lg transition-colors flex items-center space-x-2 text-left"
+                                >
+                                  <span>🗑️</span>
+                                  <span className="text-sm text-gray-300">Eliminar</span>
+                                </button>
+                              </div>
+                            )}
                           </div>
                         )}
 
@@ -1028,23 +1037,60 @@ export default function ChatPage() {
 
           {/* Selector de emojis */}
           {showEmojiPicker && (
-            <div className="absolute bottom-20 right-4 bg-[#464758] rounded-lg shadow-lg p-2">
-              <div className="grid grid-cols-8 gap-1">
-                {['👍', '❤️', '😊', '😂', '😍', '🎉', '👏', '🔥'].map(emoji => (
+            <div className="absolute bottom-20 right-4 bg-[#464758] rounded-xl shadow-lg p-4 w-96 border border-[#7289da]/20 backdrop-blur-sm">
+              <div className="mb-4 text-white/80 text-sm font-medium px-2 flex justify-between items-center">
+                <span>Stickers y Emojis</span>
+                <button 
+                  onClick={() => setShowEmojiPicker(false)}
+                  className="text-white/60 hover:text-white/80"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                {[
+                  { emoji: '❤️', text: 'Te quiero' },
+                  { emoji: '👍', text: '¡Me gusta!' },
+                  { emoji: '😂', text: 'jajaja' },
+                  { emoji: '😍', text: '¡Me encanta!' },
+                  { emoji: '🎉', text: '¡Felicidades!' },
+                  { emoji: '👏', text: '¡Bravo!' },
+                  { emoji: '🔥', text: '¡Fuego!' },
+                  { emoji: '🌟', text: '¡Increíble!' },
+                  { emoji: '🤗', text: '¡Un abrazo!' }
+                ].map(({ emoji, text }) => (
                   <button
                     key={emoji}
-                    onClick={() => {
-                      if (selectedEmoji) {
-                        handleReaction(selectedEmoji, emoji)
-                        setSelectedEmoji(null)
-                      } else {
-                        setNewMessage(prev => prev + emoji)
-                      }
+                    onClick={async () => {
                       setShowEmojiPicker(false)
+                      // Enviar directamente como mensaje
+                      if (!sending && currentUser && userId) {
+                        setSending(true)
+                        try {
+                          await supabase
+                            .from('messages')
+                            .insert({
+                              sender_id: currentUser.id,
+                              receiver_id: userId,
+                              content: `${emoji} ${text}`
+                            })
+                        } catch (error) {
+                          console.error('Error sending sticker:', error)
+                        } finally {
+                          setSending(false)
+                        }
+                      }
                     }}
-                    className="p-2 hover:bg-[#7289da]/20 rounded transition-colors"
+                    className="flex flex-col items-center p-4 hover:bg-[#7289da]/20 rounded-xl transition-all transform hover:scale-105 group"
                   >
-                    {emoji}
+                    <div className="bg-gradient-to-br from-[#7289da]/10 to-[#6cf0c8]/10 rounded-xl p-4 mb-2">
+                      <span className="text-5xl block transform transition-transform group-hover:scale-110" style={{ filter: 'drop-shadow(0 0 8px rgba(108, 240, 200, 0.3))' }}>
+                        {emoji}
+                      </span>
+                    </div>
+                    <span className="text-sm text-white/60 group-hover:text-white/80 transition-colors text-center">
+                      {text}
+                    </span>
                   </button>
                 ))}
               </div>
