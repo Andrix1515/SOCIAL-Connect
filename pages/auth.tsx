@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { useSupabaseClient, useSession } from '@supabase/auth-helpers-react'
-import { Mail, Lock, User, Eye, EyeOff, ArrowLeft } from 'lucide-react'
+import { Mail, Lock, User, Eye, EyeOff, ArrowLeft, CheckCircle } from 'lucide-react'
 
 export default function AuthPage() {
   const router = useRouter()
@@ -10,6 +10,7 @@ export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true)
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmation, setShowConfirmation] = useState(false)
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -66,14 +67,20 @@ export default function AuthPage() {
         options: {
           data: {
             full_name: formData.fullName
-          }
+          },
+          emailRedirectTo: `${window.location.origin}/interests-quiz`
         }
       })
 
       if (error) throw error
       
       if (data.user) {
-        router.push('/interests-quiz')
+        if (data.user.identities && data.user.identities.length === 0) {
+          setError('Este correo ya está registrado. Por favor, inicia sesión.')
+          setIsLogin(true)
+        } else {
+          setShowConfirmation(true)
+        }
       }
     } catch (error: any) {
       setError(error.message || 'Error al crear cuenta')
@@ -84,6 +91,33 @@ export default function AuthPage() {
 
   const handleBackToHome = () => {
     router.push('/')
+  }
+
+  if (showConfirmation) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460] flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-[#1f1f3a]/90 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-[#e94560]/20 text-center">
+          <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-6" />
+          <h2 className="text-2xl font-bold text-white mb-4">¡Registro Exitoso!</h2>
+          <div className="space-y-4 text-gray-300">
+            <p>Te hemos enviado un correo de confirmación a:</p>
+            <p className="font-medium text-[#e94560]">{formData.email}</p>
+            <p>Por favor, revisa tu bandeja de entrada y haz clic en el enlace de verificación para activar tu cuenta.</p>
+            <div className="mt-6 p-4 bg-[#16213e] rounded-lg">
+              <p className="text-sm">
+                <span className="font-medium text-[#e94560]">Nota:</span> Si no encuentras el correo, revisa tu carpeta de spam.
+              </p>
+            </div>
+            <button
+              onClick={() => setIsLogin(true)}
+              className="mt-6 text-[#e94560] hover:text-[#ff6b6b] font-medium"
+            >
+              Volver a Iniciar Sesión
+            </button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
