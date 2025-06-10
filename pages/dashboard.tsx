@@ -361,7 +361,7 @@ export default function ImprovedDashboard({ initialSession, user, profile }: {
               </div>
               <div>
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-[#7289da] to-[#6cf0c8] bg-clip-text text-transparent">
-                  SocialConnect
+                WooMeet!
                 </h1>
                 <p className="text-sm text-gray-300">
                   ¡Hola {currentProfile && currentProfile.full_name ? currentProfile.full_name : 'Usuario'}!

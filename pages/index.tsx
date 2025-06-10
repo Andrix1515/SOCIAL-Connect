@@ -102,7 +102,7 @@ export default function LandingPage() {
             
             <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold text-gray-100 mb-6">
               <span className="bg-gradient-to-r from-[#e94560] to-[#ff6b6b] bg-clip-text text-transparent">
-                SocialConnect
+                WooMeet!
               </span>
             </h1>
             
@@ -316,7 +316,7 @@ export default function LandingPage() {
                   <Mail className="w-6 h-6 text-[#e94560]" />
                 </div>
                 <h3 className="text-white font-semibold mb-2">Email</h3>
-                <p className="text-gray-300">contacto@socialconnect.com</p>
+                <p className="text-gray-300">contacto@WooMeet!.com</p>
               </div>
             </div>
             <div className="flex items-center justify-center">
@@ -325,7 +325,7 @@ export default function LandingPage() {
                   <Phone className="w-6 h-6 text-[#e94560]" />
                 </div>
                 <h3 className="text-white font-semibold mb-2">Teléfono</h3>
-                <p className="text-gray-300">+51 999 999 999</p>
+                <p className="text-gray-300">+51 962 948 453</p>
               </div>
             </div>
             <div className="flex items-center justify-center">
@@ -346,7 +346,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
-              <h3 className="text-white font-bold text-lg mb-4">SocialConnect</h3>
+              <h3 className="text-white font-bold text-lg mb-4">WooMeet!</h3>
               <p className="text-gray-400">Conectando personas, creando historias.</p>
             </div>
             <div>
@@ -386,7 +386,7 @@ export default function LandingPage() {
           </div>
           <div className="border-t border-gray-800 pt-8">
             <p className="text-center text-gray-400">
-              © {new Date().getFullYear()} SocialConnect. Todos los derechos reservados.
+              © {new Date().getFullYear()} WooMeet!. Todos los derechos reservados.
             </p>
           </div>
         </div>

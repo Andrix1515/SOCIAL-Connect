@@ -134,7 +134,7 @@ export default function AuthPage() {
           </button>
           
           <div className="bg-gradient-to-r from-[#e94560] to-[#ff6b6b] bg-clip-text text-transparent">
-            <h1 className="text-4xl sm:text-5xl font-bold mb-2">SocialConnect</h1>
+            <h1 className="text-4xl sm:text-5xl font-bold mb-2">WooMeet!</h1>
           </div>
           <p className="text-gray-300">
             {isLogin ? 'Inicia sesión en tu cuenta' : 'Crea tu cuenta y comienza a conectar'}
