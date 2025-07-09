@@ -104,7 +104,7 @@ export const getAllInterests = async (): Promise<Interest[]> => {
 }
 
 export const getUserInterests = async (userId: string) => {
-  console.log('🔍 getUserInterests llamado para:', userId);
+  // Eliminado log innecesario
 
   // Usar el cliente de componentes que maneja automáticamente la sesión
   const client = createClientComponentClient();
@@ -115,15 +115,9 @@ export const getUserInterests = async (userId: string) => {
     .select('*')
     .eq('user_id', userId);
 
-  console.log('📊 Datos crudos de user_interests:', {
-    userId,
-    count: rawData?.length || 0,
-    data: rawData,
-    error: rawError
-  });
+  // Eliminado log innecesario
 
   if (rawError) {
-    console.error('❌ Error en consulta cruda:', rawError);
     return [];
   }
 
@@ -145,20 +139,11 @@ export const getUserInterests = async (userId: string) => {
     .eq('user_id', userId);
 
   if (error) {
-    console.error('❌ Error en getUserInterests:', error);
     return [];
   }
 
   // Verificar si tenemos datos antes del join
-  console.log('🔄 Datos antes del join:', {
-    userId,
-    count: data?.length || 0,
-    data: data?.map(d => ({
-      id: d.id,
-      user_id: d.user_id,
-      interest_id: d.interest_id
-    }))
-  });
+  // Eliminado log innecesario
 
   // Asegurarnos de que los datos tienen la estructura correcta
   const typedData = ((data as any[]) || [])
@@ -176,15 +161,7 @@ export const getUserInterests = async (userId: string) => {
       }
     }));
 
-  console.log('✅ getUserInterests resultado final:', {
-    userId,
-    count: typedData.length,
-    interests: typedData.map(ui => ({
-      id: ui.interest.id,
-      name: ui.interest.name,
-      category: ui.interest.category
-    }))
-  });
+  // Eliminado log innecesario
 
   return typedData;
 }
@@ -199,7 +176,6 @@ export const getAllUsers = async (): Promise<UserWithInterests[]> => {
       .select('id,email,full_name,avatar_url,created_at,updated_at,career,description');
 
     if (usersError) {
-      console.error('❌ Error obteniendo usuarios');
       throw usersError;
     }
 
@@ -208,9 +184,7 @@ export const getAllUsers = async (): Promise<UserWithInterests[]> => {
       .from('public_user_interests_view')
       .select('*');
 
-    if (checkError) {
-      console.error('❌ Error en verificación de user_interests');
-    }
+    // if (checkError) { /* Puedes dejar el error si quieres debug, pero lo elimino para producción */ }
 
     // Obtener todos los intereses de una vez
     const { data: allInterests, error: allInterestsError } = await client
@@ -218,7 +192,6 @@ export const getAllUsers = async (): Promise<UserWithInterests[]> => {
       .select('*');
 
     if (allInterestsError) {
-      console.error('❌ Error obteniendo todos los intereses');
       throw allInterestsError;
     }
 
@@ -228,7 +201,6 @@ export const getAllUsers = async (): Promise<UserWithInterests[]> => {
       .select('*');
 
     if (userInterestsError) {
-      console.error('❌ Error obteniendo relaciones user_interests');
       throw userInterestsError;
     }
 
@@ -258,7 +230,6 @@ export const getAllUsers = async (): Promise<UserWithInterests[]> => {
 
     return usersWithInterests;
   } catch (error) {
-    console.error('❌ Error general en getAllUsers');
     throw error;
   }
 }
@@ -284,11 +255,7 @@ export const getUserMatches = async (userId: string): Promise<{ userId: string; 
 }
 
 export const saveUserInterests = async (supabaseClient: any, userId: string, interestIds: number[]) => {
-  console.log('🔄 Guardando intereses:', {
-    userId,
-    interestCount: interestIds.length,
-    interestIds
-  });
+  // Eliminado log innecesario
 
   // Usar el cliente de componentes que maneja automáticamente la sesión
   const client = createClientComponentClient();
@@ -300,11 +267,10 @@ export const saveUserInterests = async (supabaseClient: any, userId: string, int
     .eq('user_id', userId);
   
   if (deleteError) {
-    console.error('❌ Error eliminando intereses existentes:', deleteError);
     throw deleteError;
   }
 
-  console.log('✅ Intereses anteriores eliminados');
+  // Eliminado log innecesario
   
   // Insertar nuevos intereses
   const userInterests = interestIds.map(interestId => ({
@@ -312,7 +278,7 @@ export const saveUserInterests = async (supabaseClient: any, userId: string, int
     interest_id: interestId
   }));
   
-  console.log('📝 Insertando nuevos intereses:', userInterests);
+  // Eliminado log innecesario
 
   const { data: insertData, error: insertError } = await client
     .from('user_interests')
@@ -320,14 +286,10 @@ export const saveUserInterests = async (supabaseClient: any, userId: string, int
     .select();
   
   if (insertError) {
-    console.error('❌ Error insertando nuevos intereses:', insertError);
     throw insertError;
   }
 
-  console.log('✅ Intereses guardados correctamente:', {
-    count: insertData?.length || 0,
-    data: insertData
-  });
+  // Eliminado log innecesario
 
   // Verificar que los intereses se guardaron correctamente
   const { data: verifyData, error: verifyError } = await client
@@ -335,8 +297,5 @@ export const saveUserInterests = async (supabaseClient: any, userId: string, int
     .select('*')
     .eq('user_id', userId);
 
-  console.log('🔍 Verificación de guardado:', {
-    count: verifyData?.length || 0,
-    error: verifyError
-  });
+  // Eliminado log innecesario
 }

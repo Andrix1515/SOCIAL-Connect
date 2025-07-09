@@ -29,6 +29,7 @@ interface ChatUser {
   is_typing: boolean
 }
 
+
 export default function ChatPage() {
   const router = useRouter()
   let { userId } = router.query
@@ -36,10 +37,9 @@ export default function ChatPage() {
     userId = userId[0]
   }
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  
+
   const user = useUser()
   const supabase = useSupabaseClient()
-  const [currentUser, setCurrentUser] = useState<any | null>(null)
   const [currentProfile, setCurrentProfile] = useState<Profile | null>(null)
   const [chatUser, setChatUser] = useState<ChatUser | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
@@ -58,12 +58,109 @@ export default function ChatPage() {
   const [hasMore, setHasMore] = useState(true)
   const MESSAGES_PER_PAGE = 20
 
+  // NUEVO: useRef para guardar los canales y limpiar correctamente
+  const messagesChannelRef = useRef<any>(null)
+  const presenceChannelRef = useRef<any>(null)
+
+
+  // Cargar datos del chat cuando userId y user estén listos
   useEffect(() => {
-    console.log('Debug user in useEffect:', user)
     if (userId && user) {
       loadChatData()
-      setupRealtimeSubscription()
       updateUserPresence()
+    }
+  }, [userId, user])
+
+  // Suscripción realtime: SOLO cuando userId y user estén listos (¡corregido para usar user directamente!)
+  useEffect(() => {
+    if (!userId || !user) return
+
+    // Limpiar canales anteriores si existen
+    if (messagesChannelRef.current) {
+      supabase.removeChannel(messagesChannelRef.current)
+      messagesChannelRef.current = null
+    }
+    if (presenceChannelRef.current) {
+      supabase.removeChannel(presenceChannelRef.current)
+      presenceChannelRef.current = null
+    }
+
+    // Canal para mensajes
+    const messagesChannel = supabase
+      .channel('messages')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'messages',
+          filter: `or(and(sender_id.eq.${user.id},receiver_id.eq.${userId}),and(sender_id.eq.${userId},receiver_id.eq.${user.id}))`
+        },
+        async (payload) => {
+          // Para inserciones de nuevos mensajes
+          if (payload.eventType === 'INSERT') {
+            const newMessage = payload.new as Message
+            setMessages(prev => {
+              if (prev.some(m => m.id === newMessage.id)) return prev
+              return [...prev, newMessage]
+            })
+            if (newMessage.sender_id === userId) {
+              await markAsRead(newMessage.id)
+            }
+          } else if (payload.eventType === 'UPDATE') {
+            const updatedMessage = payload.new as Message
+            setMessages(prev => prev.map(msg =>
+              msg.id === updatedMessage.id ? updatedMessage : msg
+            ))
+          }
+        }
+      )
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.log('Subscribed to messages channel')
+        }
+      })
+    messagesChannelRef.current = messagesChannel
+
+    // Canal para presencia
+    const presenceChannel = supabase
+      .channel('presence')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles',
+          filter: `id.eq.${userId}`
+        },
+        (payload) => {
+          if (payload.new) {
+            const lastSeen = new Date(payload.new.last_seen)
+            const now = new Date()
+            setIsOnline(now.getTime() - lastSeen.getTime() < 120000)
+            if (chatUser) {
+              setChatUser(prev => prev ? {
+                ...prev,
+                is_typing: payload.new.is_typing || false,
+                last_seen: payload.new.last_seen
+              } : null)
+            }
+          }
+        }
+      )
+      .subscribe()
+    presenceChannelRef.current = presenceChannel
+
+    // Limpiar canales al desmontar o cambiar userId/user
+    return () => {
+      if (messagesChannelRef.current) {
+        supabase.removeChannel(messagesChannelRef.current)
+        messagesChannelRef.current = null
+      }
+      if (presenceChannelRef.current) {
+        supabase.removeChannel(presenceChannelRef.current)
+        presenceChannelRef.current = null
+      }
     }
   }, [userId, user])
 
@@ -151,14 +248,11 @@ export default function ChatPage() {
 
   const loadChatData = async () => {
     try {
-      console.log('Debug userId type:', typeof userId)
-      console.log('Debug userId value:', userId)
-
       if (!user) {
         router.push('/auth')
         return
       }
-      setCurrentUser(user)
+      // setCurrentUser(user) // ELIMINADO
 
       // Fetch profile using supabase client from context
       const { data: profileData, error: profileError } = await supabase
@@ -186,7 +280,6 @@ export default function ChatPage() {
           .eq('profile_id', userId)
 
         if (interestsError) {
-          console.error('Error fetching user interests:', interestsError)
           setChatUser({
             ...chatUserData,
             user_interests: [],
@@ -217,96 +310,12 @@ export default function ChatPage() {
       await loadInitialMessages();
     } catch (error) {
       console.error('Error loading chat data:', error)
-      console.log('Debug userId:', userId)
-      console.log('Debug chatUserData:', chatUser)
     } finally {
       setLoading(false)
     }
   }
 
-  const setupRealtimeSubscription = () => {
-    // Canal para mensajes
-    const messagesChannel = supabase
-      .channel('messages')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'messages',
-          filter: `or(and(sender_id.eq.${currentUser?.id},receiver_id.eq.${userId}),and(sender_id.eq.${userId},receiver_id.eq.${currentUser?.id}))`
-        },
-        async (payload) => {
-          console.log('Realtime payload received:', payload)
-          
-          // Para inserciones de nuevos mensajes
-          if (payload.eventType === 'INSERT') {
-            const newMessage = payload.new as Message
-            setMessages(prev => {
-              // Evitar duplicados
-              if (prev.some(m => m.id === newMessage.id)) return prev
-              return [...prev, newMessage]
-            })
-            
-            // Marcar como leído si es mensaje recibido
-            if (newMessage.sender_id === userId) {
-              await markAsRead(newMessage.id)
-            }
-          } 
-          // Para actualizaciones (ediciones, eliminaciones, reacciones)
-          else if (payload.eventType === 'UPDATE') {
-            const updatedMessage = payload.new as Message
-            setMessages(prev => prev.map(msg => 
-              msg.id === updatedMessage.id ? updatedMessage : msg
-            ))
-
-            // Si el mensaje fue marcado como leído y es nuestro
-            if (updatedMessage.read && updatedMessage.sender_id === currentUser?.id) {
-              console.log('Mensaje marcado como leído:', updatedMessage)
-            }
-          }
-        }
-      )
-      .subscribe((status) => {
-        if (status === 'SUBSCRIBED') {
-          console.log('Subscribed to messages channel')
-        }
-      })
-
-    // Canal para estado de escritura y presencia
-    const presenceChannel = supabase
-      .channel('presence')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'profiles',
-          filter: `id.eq.${userId}`
-        },
-        (payload) => {
-          if (payload.new) {
-            const lastSeen = new Date(payload.new.last_seen)
-            const now = new Date()
-            setIsOnline(now.getTime() - lastSeen.getTime() < 120000)
-            
-            if (chatUser) {
-              setChatUser(prev => prev ? {
-                ...prev,
-                is_typing: payload.new.is_typing || false,
-                last_seen: payload.new.last_seen
-              } : null)
-            }
-          }
-        }
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(messagesChannel)
-      supabase.removeChannel(presenceChannel)
-    }
-  }
+  // ...eliminada la función setupRealtimeSubscription, ahora la lógica está en el useEffect dedicado...
 
   const handleTyping = () => {
     if (!user) return
@@ -352,14 +361,14 @@ export default function ChatPage() {
 
   const sendMessage = async (e: React.FormEvent | React.MouseEvent) => {
     e.preventDefault()
-    if (!newMessage.trim() || sending || !currentUser || !userId) return
+    if (!newMessage.trim() || sending || !user || !userId) return
 
     setSending(true)
     try {
-      const { error, data } = await supabase
+      const { error } = await supabase
         .from('messages')
         .insert({
-          sender_id: currentUser.id,
+          sender_id: user.id,
           receiver_id: userId,
           content: newMessage.trim()
         })
@@ -368,7 +377,6 @@ export default function ChatPage() {
         console.error('Error sending message:', error)
         alert('Error al enviar mensaje')
       } else {
-        console.log('Message sent successfully:', data)
         setNewMessage('')
       }
     } catch (error) {
@@ -658,14 +666,37 @@ export default function ChatPage() {
     }
   }
 
-  // Añadir un efecto para refrescar los mensajes periódicamente
+  // Autorefresh ligero cada 7 segundos como respaldo del realtime
+  const lastMessageIdRef = useRef<number | null>(null)
   useEffect(() => {
     if (!user || !userId) return
+    let isMounted = true
+    const interval = setInterval(async () => {
+      try {
+        const { data: messagesData, error: messagesError } = await supabase
+          .from('messages')
+          .select('*')
+          .or(`and(sender_id.eq.${user.id},receiver_id.eq.${userId}),and(sender_id.eq.${userId},receiver_id.eq.${user.id})`)
+          .order('created_at', { ascending: true })
 
-    // Refrescar mensajes cada 30 segundos
-    const interval = setInterval(refreshMessages, 30000)
+        if (messagesError) throw messagesError
 
-    return () => clearInterval(interval)
+        if (messagesData && messagesData.length > 0) {
+          const lastFetchedId = messagesData[messagesData.length - 1].id
+          if (!lastMessageIdRef.current || lastFetchedId !== lastMessageIdRef.current) {
+            if (isMounted) setMessages(messagesData)
+            lastMessageIdRef.current = lastFetchedId
+          }
+        }
+      } catch (error) {
+        if (isMounted) console.error('Error autorefresh messages:', error)
+      }
+    }, 7000)
+
+    return () => {
+      isMounted = false
+      clearInterval(interval)
+    }
   }, [user, userId])
 
   if (loading) {
@@ -804,7 +835,7 @@ export default function ChatPage() {
           ) : (
             <div className="space-y-4">
               {messages.map((message, index) => {
-                const isFromCurrentUser = message.sender_id === currentUser?.id
+                const isFromCurrentUser = message.sender_id === user?.id
                 const showTimestamp = index === 0 || 
                   new Date(messages[index - 1].created_at).getTime() - new Date(message.created_at).getTime() > 300000 // 5 minutos
 
@@ -1064,13 +1095,13 @@ export default function ChatPage() {
                     onClick={async () => {
                       setShowEmojiPicker(false)
                       // Enviar directamente como mensaje
-                      if (!sending && currentUser && userId) {
+                      if (!sending && user && userId) {
                         setSending(true)
                         try {
                           await supabase
                             .from('messages')
                             .insert({
-                              sender_id: currentUser.id,
+                              sender_id: user.id,
                               receiver_id: userId,
                               content: `${emoji} ${text}`
                             })

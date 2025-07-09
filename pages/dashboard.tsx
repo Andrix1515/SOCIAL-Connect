@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
-import { getCurrentUser, getCurrentProfile, getAllUsers, getUserInterests, supabase, Profile } from '../lib/supabaseClient'
-import { MessageCircle, Heart, LogOut, User, Sparkles, Filter, Search, Users, Mail, Star } from 'lucide-react'
+import { getAllUsers, getUserInterests, supabase, Profile } from '../lib/supabaseClient'
+import { MessageCircle, Heart, LogOut, User, Sparkles, Filter, Search, Users, Mail, Star, MessageSquare } from 'lucide-react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 
 interface Interest {
@@ -95,16 +95,13 @@ export default function ImprovedDashboard({ initialSession, user, profile }: {
   const [unreadMessages, setUnreadMessages] = useState(0)
 
   useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT') {
         router.push('/auth')
       } else if (session && session.user) {
         setCurrentUser(session.user)
       }
     })
-
     return () => {
       subscription.unsubscribe()
     }
@@ -279,13 +276,10 @@ export default function ImprovedDashboard({ initialSession, user, profile }: {
   }
 
   const filterAndSortUsers = () => {
-    console.log('Users before filtering:', users)
     if (!users) {
-      console.error('Users state is null or undefined')
       setFilteredUsers([])
       return
     }
-    console.log('Users state:', users)
     let filtered = users.filter(user => {
       // Filtro por búsqueda
       const matchesSearch = searchTerm === '' || 
@@ -317,7 +311,6 @@ export default function ImprovedDashboard({ initialSession, user, profile }: {
     })
 
     setFilteredUsers(filtered)
-    console.log('Filtered users after filterAndSortUsers:', filtered)
   }
 
   const handleLogout = async () => {
@@ -369,7 +362,14 @@ export default function ImprovedDashboard({ initialSession, user, profile }: {
               </div>
             </div>
             
-            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => router.push('/forums')}
+                className="inline-flex items-center px-4 py-2 text-sm font-medium text-[#7289da] bg-[#7289da]/10 rounded-lg hover:bg-[#7289da]/20 transition-colors group"
+              >
+                <MessageSquare className="h-4 w-4 mr-2 group-hover:rotate-12 transition-transform" />
+                Foros
+              </button>
               <button
                 onClick={() => router.push('/edit_profile')}
                 className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-[#7289da] to-[#6cf0c8] rounded-lg hover:from-[#d64156] hover:to-[#482e74] transition-colors"
